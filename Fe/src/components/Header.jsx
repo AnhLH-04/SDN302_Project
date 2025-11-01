@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { getUserRole, isAuthenticated } from '../utils/auth';
+import { getUserRole, isAuthenticated, logout } from '../utils/auth';
 import './Header.css';
 function Header() {
   const navigate = useNavigate();
@@ -7,8 +7,7 @@ function Header() {
   const isAuth = isAuthenticated();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
     navigate('/login');
   };
 
@@ -24,6 +23,8 @@ function Header() {
             <>
               <Link to="/">Trang chủ</Link>
               <Link to="/products">Sản phẩm</Link>
+              <Link to="/compare/vehicles">So sánh xe</Link>
+              <Link to="/compare/batteries">So sánh pin</Link>
             </>
           )}
 
@@ -34,6 +35,7 @@ function Header() {
               <Link to="/add-product">Đăng tin</Link>
               <Link to="/my-posts">Tin của tôi</Link>
               <Link to="/transactions">Giao dịch</Link>
+              <Link to="/favorites">Yêu thích</Link>
             </>
           )}
 

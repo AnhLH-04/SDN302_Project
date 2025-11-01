@@ -1,14 +1,15 @@
 import express from 'express';
 import { body } from 'express-validator';
 import {
-    getStats,
-    getAllUsers,
-    updateUserStatus,
-    deleteUser,
-    verifyVehicle,
-    verifyBattery,
-    getAllReports,
-    resolveReport,
+  getStats,
+  getAllUsers,
+  updateUserStatus,
+  deleteUser,
+  verifyVehicle,
+  verifyBattery,
+  getAllReports,
+  resolveReport,
+  getInventoryReport,
 } from '../controllers/adminController.js';
 import { authenticate, authorize } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
@@ -80,10 +81,10 @@ router.get('/users', getAllUsers);
  *         description: User status updated
  */
 router.put(
-    '/users/:id/status',
-    body('isActive').isBoolean().withMessage('isActive phải là boolean'),
-    validate,
-    updateUserStatus
+  '/users/:id/status',
+  body('isActive').isBoolean().withMessage('isActive phải là boolean'),
+  validate,
+  updateUserStatus
 );
 
 /**
@@ -189,12 +190,24 @@ router.get('/reports', getAllReports);
  *         description: Report status updated
  */
 router.put(
-    '/reports/:id',
-    body('status')
-        .isIn(['reviewing', 'resolved', 'rejected'])
-        .withMessage('Trạng thái không hợp lệ'),
-    validate,
-    resolveReport
+  '/reports/:id',
+  body('status').isIn(['reviewing', 'resolved', 'rejected']).withMessage('Trạng thái không hợp lệ'),
+  validate,
+  resolveReport
 );
+
+/**
+ * @swagger
+ * /api/admin/inventory-report:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Get inventory report by status
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Inventory report retrieved successfully
+ */
+router.get('/inventory-report', getInventoryReport);
 
 export default router;

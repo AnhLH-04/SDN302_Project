@@ -5,6 +5,7 @@ const API_BASE = '/api/admin';
 export const fetchUsers = (params) => axiosClient.get(`${API_BASE}/users`, { params });
 export const fetchReports = (params) => axiosClient.get(`${API_BASE}/reports`, { params });
 export const fetchStats = () => axiosClient.get(`${API_BASE}/stats`);
+export const fetchInventoryReport = () => axiosClient.get(`${API_BASE}/inventory-report`);
 export const deleteUser = (id) => axiosClient.delete(`${API_BASE}/users/${id}`);
 // Admin user status
 export const updateUserStatus = (id, data) =>

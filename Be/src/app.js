@@ -11,6 +11,7 @@ import vehicleRoutes from './routes/vehicleRoutes.js';
 import batteryRoutes from './routes/batteryRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import favoriteRoutes from './routes/favoriteRoutes.js';
 
 // Import middlewares
 import { errorHandler, notFound } from './middlewares/errorHandler.js';
@@ -30,12 +31,15 @@ app.use(express.static('public'));
 
 // Swagger JSON endpoint
 app.get('/api/swagger.json', (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
 });
 
 // Swagger Documentation - MUST be before other routes
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
     customCss: `
     .swagger-ui .topbar { display: none }
     .swagger-ui .info { margin: 30px 0; }
@@ -74,37 +78,39 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customSiteTitle: 'EV Platform API Documentation',
     customfavIcon: '/favicon.ico',
     swaggerOptions: {
-        persistAuthorization: true,
-        displayRequestDuration: true,
-        filter: true,
-        syntaxHighlight: {
-            activate: true,
-            theme: 'monokai'
-        },
-        tryItOutEnabled: true,
-        defaultModelsExpandDepth: 3,
-        defaultModelExpandDepth: 3,
-        docExpansion: 'list',
-        tagsSorter: 'alpha',
-        operationsSorter: 'alpha',
-    }
-}));
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      filter: true,
+      syntaxHighlight: {
+        activate: true,
+        theme: 'monokai',
+      },
+      tryItOutEnabled: true,
+      defaultModelsExpandDepth: 3,
+      defaultModelExpandDepth: 3,
+      docExpansion: 'list',
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+    },
+  })
+);
 
 // Health check
 app.get('/', (req, res) => {
-    res.json({
-        success: true,
-        message: '🚀 EV & Battery Trading Platform API is running!',
-        version: '1.0.0',
-        endpoints: {
-            auth: '/api/auth',
-            vehicles: '/api/vehicles',
-            batteries: '/api/batteries',
-            transactions: '/api/transactions',
-            admin: '/api/admin',
-            docs: '/api-docs',
-        },
-    });
+  res.json({
+    success: true,
+    message: '🚀 EV & Battery Trading Platform API is running!',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      vehicles: '/api/vehicles',
+      batteries: '/api/batteries',
+      transactions: '/api/transactions',
+      admin: '/api/admin',
+      favorites: '/api/favorites',
+      docs: '/api-docs',
+    },
+  });
 });
 
 // API routes
@@ -113,6 +119,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/batteries', batteryRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 // Error handling
 app.use(notFound);

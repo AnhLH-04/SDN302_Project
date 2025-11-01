@@ -8,37 +8,37 @@ import { QueryHelper } from '../utils/queryHelper.js';
  * @access  Public
  */
 export const getBatteries = async (req, res) => {
-    try {
-        const queryHelper = new QueryHelper(Battery.find(), req.query)
-            .filter()
-            .sort()
-            .limitFields()
-            .paginate();
+  try {
+    const queryHelper = new QueryHelper(Battery.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
 
-        if (req.query.search) {
-            queryHelper.query = Battery.find({
-                $text: { $search: req.query.search },
-            });
-        }
-
-        if (!req.user || req.user.role !== 'admin') {
-            queryHelper.query = queryHelper.query.find({ status: 'available' });
-        }
-
-        queryHelper.query = queryHelper.query.populate('sellerId', 'name email phone avatar');
-
-        const batteries = await queryHelper.query;
-        const total = await Battery.countDocuments();
-
-        return successResponse(res, 200, 'Lấy danh sách pin thành công', {
-            batteries,
-            total,
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    if (req.query.search) {
+      queryHelper.query = Battery.find({
+        $text: { $search: req.query.search },
+      });
     }
+
+    if (!req.user || req.user.role !== 'admin') {
+      queryHelper.query = queryHelper.query.find({ status: 'available' });
+    }
+
+    queryHelper.query = queryHelper.query.populate('sellerId', 'name email phone avatar');
+
+    const batteries = await queryHelper.query;
+    const total = await Battery.countDocuments();
+
+    return successResponse(res, 200, 'Lấy danh sách pin thành công', {
+      batteries,
+      total,
+      page: parseInt(req.query.page) || 1,
+      limit: parseInt(req.query.limit) || 10,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -47,22 +47,22 @@ export const getBatteries = async (req, res) => {
  * @access  Public
  */
 export const getBatteryById = async (req, res) => {
-    try {
-        const battery = await Battery.findById(req.params.id).populate(
-            'sellerId',
-            'name email phone avatar'
-        );
+  try {
+    const battery = await Battery.findById(req.params.id).populate(
+      'sellerId',
+      'name email phone avatar'
+    );
 
-        if (!battery) {
-            return errorResponse(res, 404, 'Pin không tồn tại');
-        }
-
-        return successResponse(res, 200, 'Lấy thông tin pin thành công', {
-            battery,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    if (!battery) {
+      return errorResponse(res, 404, 'Pin không tồn tại');
     }
+
+    return successResponse(res, 200, 'Lấy thông tin pin thành công', {
+      battery,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -71,24 +71,24 @@ export const getBatteryById = async (req, res) => {
  * @access  Private (Member, Admin)
  */
 export const createBattery = async (req, res) => {
-    try {
-        const batteryData = {
-            ...req.body,
-            sellerId: req.user._id,
-        };
+  try {
+    const batteryData = {
+      ...req.body,
+      sellerId: req.user._id,
+    };
 
-        if (!batteryData.suggestedPrice) {
-            batteryData.suggestedPrice = calculateBatterySuggestedPrice(batteryData);
-        }
-
-        const battery = await Battery.create(batteryData);
-
-        return successResponse(res, 201, 'Đăng tin bán pin thành công', {
-            battery,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    if (!batteryData.suggestedPrice) {
+      batteryData.suggestedPrice = calculateBatterySuggestedPrice(batteryData);
     }
+
+    const battery = await Battery.create(batteryData);
+
+    return successResponse(res, 201, 'Đăng tin bán pin thành công', {
+      battery,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -97,35 +97,28 @@ export const createBattery = async (req, res) => {
  * @access  Private (Owner hoặc Admin)
  */
 export const updateBattery = async (req, res) => {
-    try {
-        const battery = await Battery.findById(req.params.id);
+  try {
+    const battery = await Battery.findById(req.params.id);
 
-        if (!battery) {
-            return errorResponse(res, 404, 'Pin không tồn tại');
-        }
-
-        if (
-            battery.sellerId.toString() !== req.user._id.toString() &&
-            req.user.role !== 'admin'
-        ) {
-            return errorResponse(res, 403, 'Bạn không có quyền cập nhật pin này');
-        }
-
-        const updatedBattery = await Battery.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true,
-            }
-        );
-
-        return successResponse(res, 200, 'Cập nhật thông tin pin thành công', {
-            battery: updatedBattery,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    if (!battery) {
+      return errorResponse(res, 404, 'Pin không tồn tại');
     }
+
+    if (battery.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return errorResponse(res, 403, 'Bạn không có quyền cập nhật pin này');
+    }
+
+    const updatedBattery = await Battery.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    return successResponse(res, 200, 'Cập nhật thông tin pin thành công', {
+      battery: updatedBattery,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -134,26 +127,23 @@ export const updateBattery = async (req, res) => {
  * @access  Private (Owner hoặc Admin)
  */
 export const deleteBattery = async (req, res) => {
-    try {
-        const battery = await Battery.findById(req.params.id);
+  try {
+    const battery = await Battery.findById(req.params.id);
 
-        if (!battery) {
-            return errorResponse(res, 404, 'Pin không tồn tại');
-        }
-
-        if (
-            battery.sellerId.toString() !== req.user._id.toString() &&
-            req.user.role !== 'admin'
-        ) {
-            return errorResponse(res, 403, 'Bạn không có quyền xóa pin này');
-        }
-
-        await Battery.findByIdAndDelete(req.params.id);
-
-        return successResponse(res, 200, 'Xóa pin thành công');
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    if (!battery) {
+      return errorResponse(res, 404, 'Pin không tồn tại');
     }
+
+    if (battery.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return errorResponse(res, 403, 'Bạn không có quyền xóa pin này');
+    }
+
+    await Battery.findByIdAndDelete(req.params.id);
+
+    return successResponse(res, 200, 'Xóa pin thành công');
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -162,56 +152,54 @@ export const deleteBattery = async (req, res) => {
  * @access  Private
  */
 export const getMyBatteries = async (req, res) => {
-    try {
-        const batteries = await Battery.find({ sellerId: req.user._id }).sort(
-            '-createdAt'
-        );
+  try {
+    const batteries = await Battery.find({ sellerId: req.user._id }).sort('-createdAt');
 
-        return successResponse(res, 200, 'Lấy danh sách pin của bạn thành công', {
-            batteries,
-            total: batteries.length,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
-    }
+    return successResponse(res, 200, 'Lấy danh sách pin của bạn thành công', {
+      batteries,
+      total: batteries.length,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
  * Hàm tính giá gợi ý cho pin
  */
 function calculateBatterySuggestedPrice(batteryData) {
-    const { price, health, cycleCount, condition, manufactureYear } = batteryData;
+  const { price, health, cycleCount, condition, manufactureYear } = batteryData;
 
-    if (!price) return null;
+  if (!price) return null;
 
-    let suggestedPrice = price;
+  let suggestedPrice = price;
 
-    // Giảm giá theo độ chai pin
-    if (health) {
-        const healthDecrease = (100 - health) * 0.015;
-        suggestedPrice -= suggestedPrice * healthDecrease;
-    }
+  // Giảm giá theo độ chai pin
+  if (health) {
+    const healthDecrease = (100 - health) * 0.015;
+    suggestedPrice -= suggestedPrice * healthDecrease;
+  }
 
-    // Giảm giá theo số chu kỳ sạc
-    if (cycleCount) {
-        suggestedPrice -= (cycleCount / 100) * 500000; // Giảm 500k mỗi 100 chu kỳ
-    }
+  // Giảm giá theo số chu kỳ sạc
+  if (cycleCount) {
+    suggestedPrice -= (cycleCount / 100) * 500000; // Giảm 500k mỗi 100 chu kỳ
+  }
 
-    // Giảm giá theo năm sản xuất
-    if (manufactureYear) {
-        const currentYear = new Date().getFullYear();
-        const age = currentYear - manufactureYear;
-        suggestedPrice -= suggestedPrice * (age * 0.08);
-    }
+  // Giảm giá theo năm sản xuất
+  if (manufactureYear) {
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - manufactureYear;
+    suggestedPrice -= suggestedPrice * (age * 0.08);
+  }
 
-    // Điều chỉnh theo condition
-    const conditionMultiplier = {
-        excellent: 1.0,
-        good: 0.85,
-        fair: 0.7,
-        poor: 0.5,
-    };
-    suggestedPrice *= conditionMultiplier[condition] || 0.85;
+  // Điều chỉnh theo condition
+  const conditionMultiplier = {
+    excellent: 1.0,
+    good: 0.85,
+    fair: 0.7,
+    poor: 0.5,
+  };
+  suggestedPrice *= conditionMultiplier[condition] || 0.85;
 
-    return Math.round(suggestedPrice);
+  return Math.round(suggestedPrice);
 }

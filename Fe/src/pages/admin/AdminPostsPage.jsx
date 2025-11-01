@@ -50,17 +50,15 @@ const AdminPostsPage = () => {
               <th>Tên sản phẩm</th>
               <th>Người bán</th>
               <th>Loại</th>
-              <th>Trạng thái</th>
               <th>Xác minh</th>
             </tr>
           </thead>
           <tbody>
             {posts.map((p) => (
               <tr key={p._id}>
-                <td>{p.name || p.model}</td>
+                <td>{p.title || p.model || p.name}</td>
                 <td>{p.sellerId?.name}</td>
                 <td>{p.type}</td>
-                <td>{p.status}</td>
                 <td>
                   <button onClick={() => handleVerify(p, !p.isVerified)}>
                     {p.isVerified ? 'Bỏ xác minh' : 'Xác minh'}

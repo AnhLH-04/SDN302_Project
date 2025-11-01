@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed": "node src/seeders/index.js",
-    "seed:clean": "node src/seeders/clean.js"
+    "seed:clean": "node src/seeders/clean.js",
+    "fix:favorites": "node src/seeders/fixFavorites.js"
   },
   "keywords": [
     "ev",

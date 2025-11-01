@@ -8,45 +8,45 @@ import { QueryHelper } from '../utils/queryHelper.js';
  * @access  Public
  */
 export const getVehicles = async (req, res) => {
-    try {
-        // Build query
-        const queryHelper = new QueryHelper(Vehicle.find(), req.query)
-            .filter()
-            .sort()
-            .limitFields()
-            .paginate();
+  try {
+    // Build query
+    const queryHelper = new QueryHelper(Vehicle.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
 
-        // Thêm search
-        if (req.query.search) {
-            queryHelper.query = Vehicle.find({
-                $text: { $search: req.query.search },
-            });
-        }
-
-        // Chỉ hiển thị xe available cho guest/member
-        if (!req.user || req.user.role !== 'admin') {
-            queryHelper.query = queryHelper.query.find({ status: 'available' });
-        }
-
-        // Populate seller info
-        queryHelper.query = queryHelper.query.populate('sellerId', 'name email phone avatar');
-
-        const vehicles = await queryHelper.query;
-
-        // Count total
-        const total = await Vehicle.countDocuments(
-            queryHelper.query.getFilter ? queryHelper.query.getFilter() : {}
-        );
-
-        return successResponse(res, 200, 'Lấy danh sách xe thành công', {
-            vehicles,
-            total,
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    // Thêm search
+    if (req.query.search) {
+      queryHelper.query = Vehicle.find({
+        $text: { $search: req.query.search },
+      });
     }
+
+    // Chỉ hiển thị xe available cho guest/member
+    if (!req.user || req.user.role !== 'admin') {
+      queryHelper.query = queryHelper.query.find({ status: 'available' });
+    }
+
+    // Populate seller info
+    queryHelper.query = queryHelper.query.populate('sellerId', 'name email phone avatar');
+
+    const vehicles = await queryHelper.query;
+
+    // Count total
+    const total = await Vehicle.countDocuments(
+      queryHelper.query.getFilter ? queryHelper.query.getFilter() : {}
+    );
+
+    return successResponse(res, 200, 'Lấy danh sách xe thành công', {
+      vehicles,
+      total,
+      page: parseInt(req.query.page) || 1,
+      limit: parseInt(req.query.limit) || 10,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -55,26 +55,26 @@ export const getVehicles = async (req, res) => {
  * @access  Public
  */
 export const getVehicleById = async (req, res) => {
-    try {
-        const vehicle = await Vehicle.findById(req.params.id).populate(
-            'sellerId',
-            'name email phone avatar'
-        );
+  try {
+    const vehicle = await Vehicle.findById(req.params.id).populate(
+      'sellerId',
+      'name email phone avatar'
+    );
 
-        if (!vehicle) {
-            return errorResponse(res, 404, 'Xe không tồn tại');
-        }
-
-        // Tăng view count
-        vehicle.viewCount += 1;
-        await vehicle.save();
-
-        return successResponse(res, 200, 'Lấy thông tin xe thành công', {
-            vehicle,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    if (!vehicle) {
+      return errorResponse(res, 404, 'Xe không tồn tại');
     }
+
+    // Tăng view count
+    vehicle.viewCount += 1;
+    await vehicle.save();
+
+    return successResponse(res, 200, 'Lấy thông tin xe thành công', {
+      vehicle,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -83,25 +83,25 @@ export const getVehicleById = async (req, res) => {
  * @access  Private (Member, Admin)
  */
 export const createVehicle = async (req, res) => {
-    try {
-        const vehicleData = {
-            ...req.body,
-            sellerId: req.user._id,
-        };
+  try {
+    const vehicleData = {
+      ...req.body,
+      sellerId: req.user._id,
+    };
 
-        // AI suggest price (mô phỏng đơn giản)
-        if (!vehicleData.suggestedPrice) {
-            vehicleData.suggestedPrice = calculateSuggestedPrice(vehicleData);
-        }
-
-        const vehicle = await Vehicle.create(vehicleData);
-
-        return successResponse(res, 201, 'Đăng tin bán xe thành công', {
-            vehicle,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    // AI suggest price (mô phỏng đơn giản)
+    if (!vehicleData.suggestedPrice) {
+      vehicleData.suggestedPrice = calculateSuggestedPrice(vehicleData);
     }
+
+    const vehicle = await Vehicle.create(vehicleData);
+
+    return successResponse(res, 201, 'Đăng tin bán xe thành công', {
+      vehicle,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -110,36 +110,29 @@ export const createVehicle = async (req, res) => {
  * @access  Private (Owner hoặc Admin)
  */
 export const updateVehicle = async (req, res) => {
-    try {
-        const vehicle = await Vehicle.findById(req.params.id);
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
 
-        if (!vehicle) {
-            return errorResponse(res, 404, 'Xe không tồn tại');
-        }
-
-        // Kiểm tra quyền (chỉ owner hoặc admin mới được update)
-        if (
-            vehicle.sellerId.toString() !== req.user._id.toString() &&
-            req.user.role !== 'admin'
-        ) {
-            return errorResponse(res, 403, 'Bạn không có quyền cập nhật xe này');
-        }
-
-        const updatedVehicle = await Vehicle.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true,
-            }
-        );
-
-        return successResponse(res, 200, 'Cập nhật thông tin xe thành công', {
-            vehicle: updatedVehicle,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    if (!vehicle) {
+      return errorResponse(res, 404, 'Xe không tồn tại');
     }
+
+    // Kiểm tra quyền (chỉ owner hoặc admin mới được update)
+    if (vehicle.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return errorResponse(res, 403, 'Bạn không có quyền cập nhật xe này');
+    }
+
+    const updatedVehicle = await Vehicle.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    return successResponse(res, 200, 'Cập nhật thông tin xe thành công', {
+      vehicle: updatedVehicle,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -148,27 +141,24 @@ export const updateVehicle = async (req, res) => {
  * @access  Private (Owner hoặc Admin)
  */
 export const deleteVehicle = async (req, res) => {
-    try {
-        const vehicle = await Vehicle.findById(req.params.id);
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
 
-        if (!vehicle) {
-            return errorResponse(res, 404, 'Xe không tồn tại');
-        }
-
-        // Kiểm tra quyền
-        if (
-            vehicle.sellerId.toString() !== req.user._id.toString() &&
-            req.user.role !== 'admin'
-        ) {
-            return errorResponse(res, 403, 'Bạn không có quyền xóa xe này');
-        }
-
-        await Vehicle.findByIdAndDelete(req.params.id);
-
-        return successResponse(res, 200, 'Xóa xe thành công');
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
+    if (!vehicle) {
+      return errorResponse(res, 404, 'Xe không tồn tại');
     }
+
+    // Kiểm tra quyền
+    if (vehicle.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return errorResponse(res, 403, 'Bạn không có quyền xóa xe này');
+    }
+
+    await Vehicle.findByIdAndDelete(req.params.id);
+
+    return successResponse(res, 200, 'Xóa xe thành công');
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
@@ -177,54 +167,52 @@ export const deleteVehicle = async (req, res) => {
  * @access  Private
  */
 export const getMyVehicles = async (req, res) => {
-    try {
-        const vehicles = await Vehicle.find({ sellerId: req.user._id }).sort(
-            '-createdAt'
-        );
+  try {
+    const vehicles = await Vehicle.find({ sellerId: req.user._id }).sort('-createdAt');
 
-        return successResponse(res, 200, 'Lấy danh sách xe của bạn thành công', {
-            vehicles,
-            total: vehicles.length,
-        });
-    } catch (error) {
-        return errorResponse(res, 500, error.message);
-    }
+    return successResponse(res, 200, 'Lấy danh sách xe của bạn thành công', {
+      vehicles,
+      total: vehicles.length,
+    });
+  } catch (error) {
+    return errorResponse(res, 500, error.message);
+  }
 };
 
 /**
  * Hàm tính giá gợi ý (mô phỏng AI)
  */
 function calculateSuggestedPrice(vehicleData) {
-    const { price, year, mileage, batteryHealth, condition } = vehicleData;
+  const { price, year, mileage, batteryHealth, condition } = vehicleData;
 
-    if (!price) return null;
+  if (!price) return null;
 
-    let suggestedPrice = price;
+  let suggestedPrice = price;
 
-    // Giảm giá theo năm sản xuất (5% mỗi năm)
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - year;
-    suggestedPrice -= suggestedPrice * (age * 0.05);
+  // Giảm giá theo năm sản xuất (5% mỗi năm)
+  const currentYear = new Date().getFullYear();
+  const age = currentYear - year;
+  suggestedPrice -= suggestedPrice * (age * 0.05);
 
-    // Giảm giá theo km đã đi
-    if (mileage) {
-        suggestedPrice -= (mileage / 10000) * 1000000; // Giảm 1tr mỗi 10k km
-    }
+  // Giảm giá theo km đã đi
+  if (mileage) {
+    suggestedPrice -= (mileage / 10000) * 1000000; // Giảm 1tr mỗi 10k km
+  }
 
-    // Giảm giá theo tình trạng pin
-    if (batteryHealth) {
-        const healthDecrease = (100 - batteryHealth) * 0.01;
-        suggestedPrice -= suggestedPrice * healthDecrease;
-    }
+  // Giảm giá theo tình trạng pin
+  if (batteryHealth) {
+    const healthDecrease = (100 - batteryHealth) * 0.01;
+    suggestedPrice -= suggestedPrice * healthDecrease;
+  }
 
-    // Điều chỉnh theo condition
-    const conditionMultiplier = {
-        new: 1.0,
-        'like-new': 0.95,
-        good: 0.85,
-        fair: 0.7,
-    };
-    suggestedPrice *= conditionMultiplier[condition] || 0.85;
+  // Điều chỉnh theo condition
+  const conditionMultiplier = {
+    new: 1.0,
+    'like-new': 0.95,
+    good: 0.85,
+    fair: 0.7,
+  };
+  suggestedPrice *= conditionMultiplier[condition] || 0.85;
 
-    return Math.round(suggestedPrice);
+  return Math.round(suggestedPrice);
 }
