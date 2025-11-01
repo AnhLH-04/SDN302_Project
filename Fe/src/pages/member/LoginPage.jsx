@@ -81,7 +81,8 @@ const LoginPage = () => {
       const res = await login(form);
       localStorage.setItem('token', res.data.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.data.user));
-      window.location.href = '/';
+      const role = res?.data?.data?.user?.role;
+      window.location.href = role === 'admin' ? '/admin' : '/';
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại');
     }

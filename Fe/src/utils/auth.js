@@ -23,3 +23,19 @@ export function isAdmin() {
 export function isMember() {
   return getUserRole() === 'member';
 }
+
+// Centralized logout to keep app state in sync
+export function logout() {
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  } finally {
+    // Notify app so contexts can react immediately without full reload
+    window.dispatchEvent(new Event('auth:logout'));
+  }
+}
+
+// Optional helper if you want to set auth and notify
+export function notifyLogin() {
+  window.dispatchEvent(new Event('auth:login'));
+}

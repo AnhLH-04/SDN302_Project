@@ -1,12 +1,12 @@
 import express from 'express';
 import { body } from 'express-validator';
 import {
-    getVehicles,
-    getVehicleById,
-    createVehicle,
-    updateVehicle,
-    deleteVehicle,
-    getMyVehicles,
+  getVehicles,
+  getVehicleById,
+  createVehicle,
+  updateVehicle,
+  deleteVehicle,
+  getMyVehicles,
 } from '../controllers/vehicleController.js';
 import { authenticate, optionalAuth, authorize } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
@@ -15,15 +15,13 @@ const router = express.Router();
 
 // Validation rules
 const vehicleValidation = [
-    body('title').trim().notEmpty().withMessage('Vui lòng nhập tiêu đề'),
-    body('brand').notEmpty().withMessage('Vui lòng chọn hãng xe'),
-    body('model').trim().notEmpty().withMessage('Vui lòng nhập model xe'),
-    body('year').isInt({ min: 2010 }).withMessage('Năm sản xuất không hợp lệ'),
-    body('price').isFloat({ min: 0 }).withMessage('Giá không hợp lệ'),
-    body('batteryCapacity')
-        .isFloat({ min: 0 })
-        .withMessage('Dung lượng pin không hợp lệ'),
-    body('location').trim().notEmpty().withMessage('Vui lòng nhập địa chỉ'),
+  body('title').trim().notEmpty().withMessage('Vui lòng nhập tiêu đề'),
+  body('brand').notEmpty().withMessage('Vui lòng chọn hãng xe'),
+  body('model').trim().notEmpty().withMessage('Vui lòng nhập model xe'),
+  body('year').isInt({ min: 2010 }).withMessage('Năm sản xuất không hợp lệ'),
+  body('price').isFloat({ min: 0 }).withMessage('Giá không hợp lệ'),
+  body('batteryCapacity').isFloat({ min: 0 }).withMessage('Dung lượng pin không hợp lệ'),
+  body('location').trim().notEmpty().withMessage('Vui lòng nhập địa chỉ'),
 ];
 
 // Public routes
@@ -198,12 +196,12 @@ router.get('/my/vehicles', authenticate, getMyVehicles);
  *         description: Forbidden - member role required
  */
 router.post(
-    '/',
-    authenticate,
-    authorize('member', 'admin'),
-    vehicleValidation,
-    validate,
-    createVehicle
+  '/',
+  authenticate,
+  authorize('member', 'admin'),
+  vehicleValidation,
+  validate,
+  createVehicle
 );
 
 /**
