@@ -1,0 +1,36 @@
+/* MyPostsPage styles */
+.my-posts-container {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(44, 62, 80, 0.1);
+  padding: 32px 24px 24px 24px;
+}
+.my-posts-title {
+  font-size: 2rem;
+  color: #2b5876;
+  font-weight: bold;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.my-posts-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: center;
+}
+.my-post-card {
+  background: #f7f7f7;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+  padding: 16px 14px;
+  min-width: 220px;
+  max-width: 260px;
+  transition: box-shadow 0.18s, transform 0.18s;
+  cursor: pointer;
+}
+.my-post-card:hover {
+  box-shadow: 0 6px 24px rgba(44, 62, 80, 0.12);
+  transform: translateY(-4px) scale(1.03);
+}

@@ -1,0 +1,373 @@
+/* =========================
+   📦 PREMIUM PRODUCTS PAGE
+========================= */
+.products-container {
+  max-width: 1400px;
+  margin: 80px auto;
+  padding: 48px 40px;
+  position: relative;
+  min-height: 70vh;
+}
+
+/* =========================
+   📝 PRODUCTS TITLE
+========================= */
+.products-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  text-align: center;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 1px;
+  filter: drop-shadow(0 2px 8px rgba(246, 211, 101, 0.4));
+}
+
+.products-subtitle {
+  text-align: center;
+  color: rgba(253, 160, 133, 0.9);
+  font-size: 1rem;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.3px;
+}
+
+/* =========================
+   🔍 FILTER BAR
+========================= */
+.filter-bar {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 48px;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  max-width: 500px;
+  padding: 16px 20px;
+  font-size: 1rem;
+  border: 2px solid rgba(246, 211, 101, 0.3);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  color: #f6d365;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.search-input::placeholder {
+  color: rgba(246, 211, 101, 0.6);
+  font-weight: 500;
+}
+
+.search-input:focus {
+  border-color: #f6d365;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(246, 211, 101, 0.2), 0 4px 12px rgba(246, 211, 101, 0.3);
+  transform: translateY(-2px);
+}
+
+.search-input:hover:not(:focus) {
+  border-color: rgba(246, 211, 101, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.filter-select {
+  min-width: 200px;
+  padding: 16px 20px;
+  font-size: 1rem;
+  border: 2px solid rgba(246, 211, 101, 0.3);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: #f6d365;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.5px;
+}
+
+.filter-select option {
+  background-color: #2c5364;
+  color: #ffffff;
+  padding: 12px;
+  font-weight: 600;
+}
+
+.filter-select:hover {
+  border-color: rgba(246, 211, 101, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(246, 211, 101, 0.1);
+}
+
+.filter-select:focus {
+  border-color: #f6d365;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(246, 211, 101, 0.2), 0 4px 12px rgba(246, 211, 101, 0.3);
+}
+
+/* =========================
+   📋 PRODUCTS CONTENT
+========================= */
+.products-content {
+  position: relative;
+  z-index: 1;
+}
+
+.product-section {
+  margin-bottom: 60px;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding-left: 16px;
+  border-left: 4px solid #f6d365;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(246, 211, 101, 0.3);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   🎨 LOADING STATE
+========================= */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+  color: #fda085;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(246, 211, 101, 0.3);
+  border-radius: 50%;
+  border-top-color: #f6d365;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   😔 EMPTY STATE
+========================= */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  border: 2px dashed rgba(246, 211, 101, 0.3);
+  padding: 60px 40px;
+}
+
+.empty-state p {
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.empty-subtitle {
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+  background: linear-gradient(135deg, #fda085 0%, #f093fb 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* =========================
+   📱 RESPONSIVE DESIGN
+========================= */
+@media (max-width: 1200px) {
+  .products-container {
+    max-width: 100%;
+    padding: 40px 32px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .products-container {
+    margin: 40px 0;
+    padding: 40px 20px;
+  }
+
+  .products-title {
+    font-size: 2.2rem;
+  }
+
+  .products-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .search-input,
+  .filter-select {
+    width: 100%;
+    max-width: 100%;
+    padding: 14px 18px;
+    font-size: 0.95rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .product-section {
+    margin-bottom: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-container {
+    margin: 20px 0;
+    padding: 32px 16px;
+  }
+
+  .products-title {
+    font-size: 1.8rem;
+  }
+
+  .products-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+  }
+
+  .search-input,
+  .filter-select {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+    padding-left: 12px;
+  }
+
+  .empty-state {
+    padding: 40px 24px;
+  }
+
+  .empty-state p {
+    font-size: 1.1rem;
+  }
+}
+
+/* Focus visible for accessibility */
+.search-input:focus-visible,
+.filter-select:focus-visible {
+  outline: 2px solid #f6d365;
+  outline-offset: 2px;
+}
+
+/* =========================
+   🎨 BACKGROUND EFFECTS (Optional)
+========================= */
+.products-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(15, 32, 39, 0.95), rgba(44, 83, 100, 0.98));
+  z-index: -2;
+}
+
+.products-container::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 20% 30%, rgba(246, 211, 101, 0.1), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(240, 147, 251, 0.08), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(253, 160, 133, 0.09), transparent 40%);
+  background-size: 300% 300%;
+  animation: particleFloat 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes particleFloat {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+}

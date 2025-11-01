@@ -1,0 +1,336 @@
+/* =========================
+   🌐 ENHANCED HEADER (NAVBAR)
+========================= */
+.navbar {
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg, #f6d365, #fda085, #f093fb) 1;
+}
+
+/* Animated background particles */
+.navbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(253, 160, 133, 0.1) 0%, transparent 50%);
+  animation: particleMove 15s ease-in-out infinite;
+}
+
+@keyframes particleMove {
+  0%,
+  100% {
+    background-position: 0% 50%, 100% 80%, 40% 20%;
+  }
+  50% {
+    background-position: 100% 50%, 0% 20%, 60% 80%;
+  }
+}
+
+/* Glowing top border */
+.navbar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(246, 211, 101, 0.8),
+    rgba(253, 160, 133, 0.8),
+    rgba(240, 147, 251, 0.8),
+    transparent
+  );
+  animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.navbar-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================
+   🏷️ PREMIUM LOGO
+========================= */
+.nav-logo {
+  font-size: 2.2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 2px;
+  text-decoration: none;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  filter: drop-shadow(0 0 20px rgba(246, 211, 101, 0.3));
+}
+
+.nav-logo::before {
+  content: '⚡';
+  font-size: 2.5rem;
+  -webkit-text-fill-color: #ffd86a;
+  animation: logoGlow 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(255, 216, 106, 0.8));
+}
+
+@keyframes logoGlow {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 10px rgba(255, 216, 106, 0.8));
+  }
+  50% {
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 0 20px rgba(255, 216, 106, 1));
+  }
+}
+
+.nav-logo:hover {
+  transform: translateY(-3px) scale(1.02);
+  filter: drop-shadow(0 8px 30px rgba(246, 211, 101, 0.5));
+}
+
+/* =========================
+   🔗 PREMIUM NAVIGATION LINKS
+========================= */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 11px 20px;
+  border-radius: 14px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Shine effect */
+.nav-links a::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: rotate(45deg);
+  transition: all 0.5s ease;
+}
+
+.nav-links a:hover::before {
+  left: 100%;
+}
+
+/* Bottom gradient line */
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 85%;
+  height: 3px;
+  background: linear-gradient(90deg, #f6d365, #fda085);
+  border-radius: 3px 3px 0 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(246, 211, 101, 0.6);
+}
+
+.nav-links a:hover {
+  color: #ffd86a;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 216, 106, 0.3);
+  box-shadow: 0 5px 20px rgba(255, 216, 106, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-links a:hover::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.nav-links a:active {
+  transform: translateY(0);
+}
+
+/* =========================
+   🚪 PREMIUM LOGOUT BUTTON
+========================= */
+.nav-logout {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  color: #2b2b2b;
+  border: none;
+  border-radius: 14px;
+  padding: 11px 28px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(253, 160, 133, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-logout::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.nav-logout::after {
+  content: '→';
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.nav-logout:hover::before {
+  width: 400px;
+  height: 400px;
+}
+
+.nav-logout:hover::after {
+  opacity: 1;
+  right: 10px;
+}
+
+.nav-logout:hover {
+  background: linear-gradient(135deg, #fff 0%, #ffeaa7 100%);
+  color: #2c5364;
+  transform: translateY(-3px);
+  padding-right: 40px;
+  box-shadow: 0 8px 25px rgba(255, 215, 106, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.nav-logout:active {
+  transform: translateY(-1px);
+}
+
+/* =========================
+   📱 RESPONSIVE - HEADER
+========================= */
+@media (max-width: 1024px) {
+  .navbar-content {
+    padding: 16px 30px;
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .nav-links {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .nav-links a {
+    font-size: 0.9rem;
+    padding: 10px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-logo {
+    font-size: 1.8rem;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .nav-links a,
+  .nav-logout {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-logo {
+    font-size: 1.5rem;
+  }
+
+  .nav-logo::before {
+    font-size: 2rem;
+  }
+
+  .nav-links a {
+    font-size: 0.85rem;
+    padding: 10px 14px;
+  }
+
+  .nav-logout {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Hover effects optimization */
+@media (hover: hover) {
+  .nav-links a,
+  .nav-logout {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}

@@ -1,0 +1,62 @@
+/* HomePage styles */
+.home-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2b5876;
+  text-align: center;
+  margin-top: 60px;
+  margin-bottom: 32px;
+}
+
+.container {
+  padding: 16px 20px 48px;
+}
+
+.section {
+  margin: 28px auto 44px;
+  max-width: 1200px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sectionTitle {
+  font-size: 1.6rem;
+  color: #2b5876;
+  margin: 0;
+}
+
+.viewAll {
+  color: #1b88f4;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.subSection {
+  margin-top: 10px;
+}
+
+.subTitle {
+  font-size: 1.1rem;
+  margin: 12px 0;
+  color: #34495e;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.loading,
+.error,
+.empty {
+  text-align: center;
+  color: #6c7a89;
+  padding: 16px 0;
+}

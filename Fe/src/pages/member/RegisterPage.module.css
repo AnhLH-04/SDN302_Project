@@ -1,0 +1,376 @@
+/* =========================
+   🔐 PREMIUM REGISTER PAGE
+========================= */
+.register-container {
+  max-width: 480px;
+  margin: 80px auto;
+  background: linear-gradient(135deg, rgba(15, 32, 39, 0.95), rgba(44, 83, 100, 0.98));
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(246, 211, 101, 0.2) inset;
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(246, 211, 101, 0.3);
+}
+
+/* Animated background gradient */
+.register-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at center,
+    rgba(246, 211, 101, 0.15) 0%,
+    rgba(253, 160, 133, 0.12) 50%,
+    transparent 70%
+  );
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Particle effect */
+.register-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 20% 30%, rgba(246, 211, 101, 0.2), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(240, 147, 251, 0.15), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(253, 160, 133, 0.18), transparent 40%);
+  background-size: 300% 300%;
+  animation: particleFloat 15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes particleFloat {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+}
+
+/* =========================
+   📝 REGISTER TITLE
+========================= */
+.register-title {
+  font-size: 2.4rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  text-align: center;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 1px;
+  filter: drop-shadow(0 2px 8px rgba(246, 211, 101, 0.4));
+}
+
+/* Subtitle/description */
+.register-subtitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.3px;
+}
+
+/* =========================
+   📋 REGISTER FORM
+========================= */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Input fields */
+.register-form input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 1rem;
+  border: 2px solid rgba(246, 211, 101, 0.3);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  box-sizing: border-box;
+}
+
+.register-form input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+}
+
+.register-form input:focus {
+  border-color: #f6d365;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(246, 211, 101, 0.2), 0 4px 12px rgba(246, 211, 101, 0.3);
+  transform: translateY(-2px);
+}
+
+.register-form input:hover:not(:focus) {
+  border-color: rgba(246, 211, 101, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================
+   🔘 REGISTER BUTTON
+========================= */
+.register-btn {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  color: #2b2b2b;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 20px rgba(246, 211, 101, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Button shine effect */
+.register-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.register-btn:hover::before {
+  width: 400px;
+  height: 400px;
+}
+
+.register-btn:hover {
+  background: linear-gradient(135deg, #fff 0%, #ffeaa7 100%);
+  color: #2c5364;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(255, 215, 106, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.register-btn:active {
+  transform: translateY(-1px);
+}
+
+.register-btn:disabled {
+  background: linear-gradient(135deg, #a0a0a0 0%, #c0c0c0 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.register-btn:disabled:hover {
+  transform: none;
+}
+
+/* =========================
+   ⚠️ ERROR & SUCCESS MESSAGES
+========================= */
+.error-message {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.2), rgba(244, 67, 54, 0.1));
+  color: #ffcdd2;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid rgba(244, 67, 54, 0.4);
+  animation: slideIn 0.3s ease-out;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.success-message {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+  color: #c8e6c9;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid rgba(76, 175, 80, 0.4);
+  animation: slideIn 0.3s ease-out;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   🔗 ADDITIONAL LINKS
+========================= */
+.register-footer {
+  text-align: center;
+  margin-top: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.register-footer a {
+  color: #ffd86a;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  letter-spacing: 0.3px;
+}
+
+.register-footer a:hover {
+  color: #f6d365;
+  text-decoration: underline;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(246, 211, 101, 0.3);
+}
+
+.divider span {
+  padding: 0 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* =========================
+   📱 RESPONSIVE DESIGN
+========================= */
+@media (max-width: 768px) {
+  .register-container {
+    margin: 40px 20px;
+    padding: 40px 28px;
+    border-radius: 20px;
+  }
+
+  .register-title {
+    font-size: 2rem;
+  }
+
+  .register-form input {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+  }
+
+  .register-btn {
+    padding: 14px 0;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    margin: 20px 16px;
+    padding: 32px 24px;
+    border-radius: 18px;
+  }
+
+  .register-title {
+    font-size: 1.8rem;
+  }
+
+  .register-form {
+    gap: 16px;
+  }
+
+  .register-form input {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+
+  .register-btn {
+    padding: 12px 0;
+    font-size: 0.95rem;
+  }
+}
+
+/* =========================
+   🎨 LOADING STATE
+========================= */
+.loading-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffd86a;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus visible for accessibility */
+.register-form input:focus-visible,
+.register-btn:focus-visible {
+  outline: 2px solid #f6d365;
+  outline-offset: 2px;
+}
