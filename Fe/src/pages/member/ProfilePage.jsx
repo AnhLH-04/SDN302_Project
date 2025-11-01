@@ -50,6 +50,21 @@ const ProfilePage = () => {
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
+  const renderStars = (rating) => {
+    return (
+      <span className={styles.stars}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            className={star <= Math.round(rating) ? styles.starActive : styles.star}
+          >
+            ★
+          </span>
+        ))}
+      </span>
+    );
+  };
+
   return (
     <div className={styles['profile-container']}>
       <h1 className={styles['profile-title']}>Hồ sơ cá nhân</h1>
@@ -60,6 +75,20 @@ const ProfilePage = () => {
           <p className={styles['profile-info']}>Email: {profile.email}</p>
           <p className={styles['profile-info']}>Số điện thoại: {profile.phone}</p>
           <p className={styles['profile-info']}>Địa chỉ: {profile.address}</p>
+
+          {/* Rating section */}
+          {profile.reviewCount > 0 && (
+            <div className={styles.ratingSection}>
+              <p className={styles['profile-info']}>
+                <strong>Đánh giá:</strong>{' '}
+                {renderStars(profile.avgRating || 0)}{' '}
+                <span className={styles.ratingText}>
+                  {(profile.avgRating || 0).toFixed(1)} ({profile.reviewCount} đánh giá)
+                </span>
+              </p>
+            </div>
+          )}
+
           <button className={styles['profile-edit-btn']} onClick={() => setEdit(true)}>
             Chỉnh sửa
           </button>

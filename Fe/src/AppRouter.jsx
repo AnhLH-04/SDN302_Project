@@ -11,7 +11,11 @@ import ProfilePage from './pages/member/ProfilePage';
 import AddProductPage from './pages/member/AddProductPage';
 import MyPostsPage from './pages/member/MyPostsPage';
 import TransactionsPage from './pages/member/TransactionsPage';
+import MyReviewsPage from './pages/member/MyReviewsPage';
+import PaymentConfirmationPage from './pages/member/PaymentConfirmationPage';
 import FavoritesPage from './pages/member/FavoritesPage';
+
+
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminPostsPage from './pages/admin/AdminPostsPage';
@@ -131,6 +135,22 @@ function AppRouter() {
                   <FavoritesPage />
                 </PrivateRoute>
               </AdminRedirect>
+            }
+          />
+          <Route
+            path="/my-reviews"
+            element={
+              <PrivateRoute>
+                <MyReviewsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/payment-confirmation"
+            element={
+              <PrivateRoute>
+                <PaymentConfirmationPage />
+              </PrivateRoute>
             }
           />
           {/* Admin (nested with admin navbar) */}
