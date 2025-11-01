@@ -40,12 +40,8 @@ function Header() {
             </>
           )}
 
-          {/* Admin: chỉ giữ Hồ sơ + Đăng xuất trên Header, các mục admin nằm ở sidebar */}
-          {isAuth && role === 'admin' && (
-            <>
-              <Link to="/profile">Hồ sơ</Link>
-            </>
-          )}
+          {/* Admin: ẩn mục Hồ sơ trên header, sử dụng sidebar trong AdminLayout */}
+          {isAuth && role === 'admin' && <></>}
 
           {/* Auth buttons */}
           {!isAuth ? (

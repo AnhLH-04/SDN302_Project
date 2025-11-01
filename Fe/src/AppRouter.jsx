@@ -15,7 +15,6 @@ import MyReviewsPage from './pages/member/MyReviewsPage';
 import PaymentConfirmationPage from './pages/member/PaymentConfirmationPage';
 import FavoritesPage from './pages/member/FavoritesPage';
 
-
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminPostsPage from './pages/admin/AdminPostsPage';
@@ -163,6 +162,7 @@ function AppRouter() {
             }
           >
             <Route index element={<AdminDashboardPage />} />
+            <Route path="profile" element={<ProfilePage />} />
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="posts" element={<AdminPostsPage />} />
             <Route path="reports" element={<AdminReportsPage />} />

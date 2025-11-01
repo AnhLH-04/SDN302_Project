@@ -21,14 +21,18 @@ export const getBatteries = async (req, res) => {
       });
     }
 
+    // Chỉ hiển thị pin available và đã được duyệt cho guest/member
     if (!req.user || req.user.role !== 'admin') {
-      queryHelper.query = queryHelper.query.find({ status: 'available' });
+      queryHelper.query = queryHelper.query.find({ status: 'available', isVerified: true });
     }
 
     queryHelper.query = queryHelper.query.populate('sellerId', 'name email phone avatar');
 
     const batteries = await queryHelper.query;
-    const total = await Battery.countDocuments();
+    // Count tổng theo cùng filter của query hiện tại
+    const total = await Battery.countDocuments(
+      queryHelper.query.getFilter ? queryHelper.query.getFilter() : {}
+    );
 
     return successResponse(res, 200, 'Lấy danh sách pin thành công', {
       batteries,
@@ -55,6 +59,18 @@ export const getBatteryById = async (req, res) => {
 
     if (!battery) {
       return errorResponse(res, 404, 'Pin không tồn tại');
+    }
+
+    // Nếu tin chưa được duyệt, chỉ cho phép chủ sở hữu hoặc admin xem
+    if (!battery.isVerified) {
+      const user = req.user;
+      const isAdmin = user && user.role === 'admin';
+      const sellerId =
+        battery.sellerId && battery.sellerId._id ? battery.sellerId._id : battery.sellerId;
+      const isOwner = user && sellerId && sellerId.toString() === user._id.toString();
+      if (!isAdmin && !isOwner) {
+        return errorResponse(res, 403, 'Tin chưa được admin duyệt');
+      }
     }
 
     return successResponse(res, 200, 'Lấy thông tin pin thành công', {
@@ -136,6 +152,11 @@ export const deleteBattery = async (req, res) => {
 
     if (battery.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return errorResponse(res, 403, 'Bạn không có quyền xóa pin này');
+    }
+
+    // Không cho phép xóa nếu pin đang giao dịch hoặc đã bán (áp dụng cho user; admin có thể override)
+    if (req.user.role !== 'admin' && (battery.status === 'pending' || battery.status === 'sold')) {
+      return errorResponse(res, 400, 'Không thể xóa tin khi đang giao dịch (pending) hoặc đã bán');
     }
 
     await Battery.findByIdAndDelete(req.params.id);

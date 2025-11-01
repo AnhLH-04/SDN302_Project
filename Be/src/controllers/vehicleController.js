@@ -23,9 +23,9 @@ export const getVehicles = async (req, res) => {
       });
     }
 
-    // Chỉ hiển thị xe available cho guest/member
+    // Chỉ hiển thị xe available và đã được duyệt (isVerified) cho guest/member
     if (!req.user || req.user.role !== 'admin') {
-      queryHelper.query = queryHelper.query.find({ status: 'available' });
+      queryHelper.query = queryHelper.query.find({ status: 'available', isVerified: true });
     }
 
     // Populate seller info
@@ -33,7 +33,7 @@ export const getVehicles = async (req, res) => {
 
     const vehicles = await queryHelper.query;
 
-    // Count total
+    // Count total theo cùng filter của query hiện tại
     const total = await Vehicle.countDocuments(
       queryHelper.query.getFilter ? queryHelper.query.getFilter() : {}
     );
@@ -63,6 +63,18 @@ export const getVehicleById = async (req, res) => {
 
     if (!vehicle) {
       return errorResponse(res, 404, 'Xe không tồn tại');
+    }
+
+    // Nếu tin chưa được admin duyệt, chỉ cho phép chủ sở hữu hoặc admin xem
+    if (!vehicle.isVerified) {
+      const user = req.user;
+      const isAdmin = user && user.role === 'admin';
+      const sellerId =
+        vehicle.sellerId && vehicle.sellerId._id ? vehicle.sellerId._id : vehicle.sellerId;
+      const isOwner = user && sellerId && sellerId.toString() === user._id.toString();
+      if (!isAdmin && !isOwner) {
+        return errorResponse(res, 403, 'Tin chưa được admin duyệt');
+      }
     }
 
     // Tăng view count
@@ -151,6 +163,11 @@ export const deleteVehicle = async (req, res) => {
     // Kiểm tra quyền
     if (vehicle.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return errorResponse(res, 403, 'Bạn không có quyền xóa xe này');
+    }
+
+    // Không cho phép xóa nếu xe đang giao dịch hoặc đã bán (áp dụng cho user; admin có thể override)
+    if (req.user.role !== 'admin' && (vehicle.status === 'pending' || vehicle.status === 'sold')) {
+      return errorResponse(res, 400, 'Không thể xóa tin khi đang giao dịch (pending) hoặc đã bán');
     }
 
     await Vehicle.findByIdAndDelete(req.params.id);
