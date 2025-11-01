@@ -1,0 +1,167 @@
+.reviewForm {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reviewForm h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.error {
+    background: #fee;
+    color: #c33;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+/* Rating Section */
+.ratingSection {
+    margin-bottom: 24px;
+}
+
+.ratingSection label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.star {
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: #ddd;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.star:hover {
+    transform: scale(1.1);
+}
+
+.star.active {
+    color: #ffc107;
+}
+
+.ratingText {
+    margin-left: 12px;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Comment Section */
+.commentSection {
+    margin-bottom: 24px;
+}
+
+.commentSection label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.commentSection textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.commentSection textarea:focus {
+    outline: none;
+    border-color: #4caf50;
+}
+
+.commentSection textarea:disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.charCount {
+    text-align: right;
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.cancelBtn,
+.submitBtn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelBtn {
+    background: #fff;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.cancelBtn:hover:not(:disabled) {
+    background: #f5f5f5;
+}
+
+.submitBtn {
+    background: #4caf50;
+    color: #fff;
+}
+
+.submitBtn:hover:not(:disabled) {
+    background: #45a049;
+}
+
+.cancelBtn:disabled,
+.submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .reviewForm {
+        padding: 16px;
+    }
+
+    .star {
+        font-size: 28px;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .cancelBtn,
+    .submitBtn {
+        width: 100%;
+    }
+}

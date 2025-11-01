@@ -34,6 +34,7 @@ function Header() {
               <Link to="/add-product">Đăng tin</Link>
               <Link to="/my-posts">Tin của tôi</Link>
               <Link to="/transactions">Giao dịch</Link>
+              <Link to="/payment-confirmation">💳 Thanh toán</Link>
             </>
           )}
 

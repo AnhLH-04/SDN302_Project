@@ -125,4 +125,4 @@ vehicleSchema.index({ brand: 1, year: -1 });
 vehicleSchema.index({ price: 1 });
 vehicleSchema.index({ status: 1, createdAt: -1 });
 
-export const Vehicle = mongoose.model('Vehicle', vehicleSchema);
+export const Vehicle = mongoose.model('vehicle', vehicleSchema);

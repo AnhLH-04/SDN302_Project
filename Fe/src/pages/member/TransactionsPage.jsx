@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchMyTransactions } from '../../services/transactionService';
+import { createReview } from '../../services/reviewService';
+import ReviewForm from '../../components/ReviewForm';
 import styles from './TransactionsPage.module.css';
 
 const TransactionsPage = () => {
@@ -7,6 +9,9 @@ const TransactionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all'); // 'all', 'buy', 'sell'
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const currentUserId = getUserId();
 
@@ -35,6 +40,50 @@ const TransactionsPage = () => {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const handleOpenReview = (transaction) => {
+    setSelectedTransaction(transaction);
+    setShowReviewModal(true);
+  };
+
+  const handleCloseReview = () => {
+    setShowReviewModal(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleSubmitReview = async (reviewData) => {
+    if (!selectedTransaction) return;
+
+    const isBuyer = selectedTransaction.buyerId?._id === currentUserId;
+    const reviewedUserId = isBuyer
+      ? selectedTransaction.sellerId._id
+      : selectedTransaction.buyerId._id;
+
+    setReviewSubmitting(true);
+
+    try {
+      await createReview({
+        transactionId: selectedTransaction._id,
+        reviewedUserId,
+        rating: reviewData.rating,
+        comment: reviewData.comment,
+      });
+
+      alert('✅ Đánh giá thành công!');
+      handleCloseReview();
+
+      // Reload transactions to update review status
+      const res = await fetchMyTransactions();
+      const transactions = res.data.data?.transactions || res.data?.transactions || [];
+      setTransactions(transactions);
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      const errorMsg = err.response?.data?.message || 'Không thể gửi đánh giá';
+      alert('❌ ' + errorMsg);
+    }
+
+    setReviewSubmitting(false);
+  };
 
   return (
     <div className={styles['transactions-container']}>
@@ -191,10 +240,50 @@ const TransactionsPage = () => {
 
                 <div className={styles['transaction-footer']}>
                   <small>🕒 {new Date(t.createdAt).toLocaleString('vi-VN')}</small>
+
+                  {/* Review button for completed transactions */}
+                  {t.status === 'completed' && !t.hasReviewed && (
+                    <button
+                      onClick={() => handleOpenReview(t)}
+                      className={styles['review-btn']}
+                    >
+                      ⭐ Đánh giá
+                    </button>
+                  )}
+
+                  {t.hasReviewed && (
+                    <span className={styles['reviewed-badge']}>
+                      ✅ Đã đánh giá
+                    </span>
+                  )}
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {showReviewModal && selectedTransaction && (
+        <div className={styles['modal-overlay']} onClick={handleCloseReview}>
+          <div className={styles['modal-content']} onClick={(e) => e.stopPropagation()}>
+            <h2>
+              Đánh giá{' '}
+              {selectedTransaction.buyerId?._id === currentUserId
+                ? 'người bán'
+                : 'người mua'}
+            </h2>
+            <p className={styles['modal-subtitle']}>
+              {selectedTransaction.buyerId?._id === currentUserId
+                ? selectedTransaction.sellerId?.name
+                : selectedTransaction.buyerId?.name}
+            </p>
+            <ReviewForm
+              onSubmit={handleSubmitReview}
+              onCancel={handleCloseReview}
+              isLoading={reviewSubmitting}
+            />
+          </div>
         </div>
       )}
     </div>

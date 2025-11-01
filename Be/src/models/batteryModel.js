@@ -112,4 +112,4 @@ batterySchema.index({ brand: 1, capacity: -1 });
 batterySchema.index({ price: 1 });
 batterySchema.index({ status: 1, createdAt: -1 });
 
-export const Battery = mongoose.model('Battery', batterySchema);
+export const Battery = mongoose.model('battery', batterySchema);
