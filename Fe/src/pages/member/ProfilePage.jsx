@@ -4,6 +4,7 @@ import styles from './ProfilePage.module.css';
 
 import { useEffect, useState } from 'react';
 import { getProfile, updateProfile } from '../../services/authService';
+import { notifyLogin } from '../../utils/auth';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -24,6 +25,13 @@ const ProfilePage = () => {
           address: res.data.data.user.address || '',
           avatar: res.data.data.user.avatar || '',
         });
+        // Đồng bộ avatar về localStorage để Header đọc và hiển thị
+        try {
+          localStorage.setItem('user', JSON.stringify(res.data.data.user));
+          notifyLogin(); // cho Header biết cập nhật lại avatar
+        } catch {
+          /* ignore storage errors */
+        }
       })
       .catch(() => setError('Không lấy được thông tin'))
       .finally(() => setLoading(false));
@@ -42,7 +50,17 @@ const ProfilePage = () => {
       setSuccess('Cập nhật thành công!');
       setEdit(false);
       setProfile((p) => ({ ...p, ...form }));
-    } catch (err) {
+      // Cập nhật localStorage và thông báo để Header refresh avatar
+      try {
+        const raw = localStorage.getItem('user');
+        const current = raw ? JSON.parse(raw) : {};
+        const nextUser = { ...current, ...form };
+        localStorage.setItem('user', JSON.stringify(nextUser));
+        notifyLogin();
+      } catch {
+        /* ignore storage errors */
+      }
+    } catch {
       setError('Cập nhật thất bại');
     }
   };
@@ -54,10 +72,7 @@ const ProfilePage = () => {
     return (
       <span className={styles.stars}>
         {[1, 2, 3, 4, 5].map((star) => (
-          <span
-            key={star}
-            className={star <= Math.round(rating) ? styles.starActive : styles.star}
-          >
+          <span key={star} className={star <= Math.round(rating) ? styles.starActive : styles.star}>
             ★
           </span>
         ))}
@@ -80,8 +95,7 @@ const ProfilePage = () => {
           {profile.reviewCount > 0 && (
             <div className={styles.ratingSection}>
               <p className={styles['profile-info']}>
-                <strong>Đánh giá:</strong>{' '}
-                {renderStars(profile.avgRating || 0)}{' '}
+                <strong>Đánh giá:</strong> {renderStars(profile.avgRating || 0)}{' '}
                 <span className={styles.ratingText}>
                   {(profile.avgRating || 0).toFixed(1)} ({profile.reviewCount} đánh giá)
                 </span>

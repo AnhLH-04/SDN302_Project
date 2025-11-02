@@ -1,0 +1,580 @@
+/* =========================
+   🏷️ PREMIUM ADMIN BRANDS PAGE
+========================= */
+.admin-brands-container {
+  max-width: 1400px;
+  margin: 80px auto;
+  padding: 48px 40px;
+  position: relative;
+  min-height: 70vh;
+}
+
+/* =========================
+   📝 BRANDS TITLE
+========================= */
+.admin-brands-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  text-align: center;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 1px;
+  filter: drop-shadow(0 2px 8px rgba(246, 211, 101, 0.4));
+}
+
+.admin-brands-subtitle {
+  text-align: center;
+  color: rgba(253, 160, 133, 0.9);
+  font-size: 1rem;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.3px;
+}
+
+/* =========================
+   📝 CREATE BRAND FORM
+========================= */
+.create-form-wrapper {
+  background: linear-gradient(135deg, rgba(15, 32, 39, 0.6), rgba(44, 83, 100, 0.7));
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 32px;
+  border: 2px solid rgba(246, 211, 101, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.form-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.5px;
+}
+
+.create-form {
+  display: grid;
+  gap: 20px;
+  max-width: 600px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(246, 211, 101, 0.9);
+  letter-spacing: 0.3px;
+}
+
+.form-input,
+.form-select {
+  padding: 14px 18px;
+  border: 2px solid rgba(246, 211, 101, 0.3);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #f6d365;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 4px rgba(246, 211, 101, 0.1);
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-select option {
+  background: #1a2332;
+  color: #ffffff;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.checkbox-input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #f6d365;
+}
+
+.checkbox-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(253, 160, 133, 0.9);
+  cursor: pointer;
+  letter-spacing: 0.3px;
+}
+
+.submit-button {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  color: #1f2937;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(246, 211, 101, 0.4);
+  text-transform: uppercase;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fda085 0%, #f093fb 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(246, 211, 101, 0.6);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================
+   📊 TABLE WRAPPER
+========================= */
+.table-wrapper {
+  background: linear-gradient(135deg, rgba(15, 32, 39, 0.6), rgba(44, 83, 100, 0.7));
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 24px;
+  border: 2px solid rgba(246, 211, 101, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow-x: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================
+   📋 TABLE STYLES
+========================= */
+.brands-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  position: relative;
+}
+
+.brands-table thead tr {
+  background: linear-gradient(135deg, rgba(246, 211, 101, 0.2), rgba(253, 160, 133, 0.2));
+}
+
+.brands-table th {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border-bottom: 2px solid rgba(246, 211, 101, 0.3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.brands-table tbody tr {
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(246, 211, 101, 0.1);
+}
+
+.brands-table tbody tr:hover {
+  background: rgba(246, 211, 101, 0.1);
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(246, 211, 101, 0.2);
+}
+
+.brands-table td {
+  padding: 16px 20px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+/* =========================
+   🏷️ BRAND INFO
+========================= */
+.brand-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #f6d365;
+  letter-spacing: 0.3px;
+}
+
+.brand-type {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.type-vehicle {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.type-battery {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.type-both {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+}
+
+/* =========================
+   📊 STATUS BADGES
+========================= */
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.status-active {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+}
+
+.status-inactive {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(100, 116, 139, 0.4);
+}
+
+/* =========================
+   ⚙️ ACTION BUTTONS
+========================= */
+.action-button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.btn-activate {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.btn-activate:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.5);
+}
+
+.btn-deactivate {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1f2937;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.btn-deactivate:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.5);
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+
+.action-button:focus-visible {
+  outline: 2px solid #f6d365;
+  outline-offset: 2px;
+}
+
+/* =========================
+   🎨 LOADING STATE
+========================= */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+.loading-text {
+  color: #fda085;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(246, 211, 101, 0.3);
+  border-radius: 50%;
+  border-top-color: #f6d365;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   ⚠️ ERROR MESSAGE
+========================= */
+.error-message {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.2), rgba(244, 67, 54, 0.1));
+  color: #ffcdd2;
+  padding: 16px 24px;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid rgba(244, 67, 54, 0.4);
+  animation: slideIn 0.3s ease-out;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   😔 EMPTY STATE
+========================= */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  border: 2px dashed rgba(246, 211, 101, 0.3);
+  padding: 60px 40px;
+}
+
+.empty-state-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* =========================
+   📱 RESPONSIVE DESIGN
+========================= */
+@media (max-width: 1200px) {
+  .admin-brands-container {
+    max-width: 100%;
+    padding: 40px 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-brands-container {
+    margin: 40px 0;
+    padding: 40px 20px;
+  }
+
+  .admin-brands-title {
+    font-size: 2.2rem;
+  }
+
+  .admin-brands-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .create-form-wrapper {
+    padding: 24px;
+  }
+
+  .form-title {
+    font-size: 1.4rem;
+  }
+
+  .create-form {
+    max-width: 100%;
+  }
+
+  .table-wrapper {
+    padding: 16px;
+  }
+
+  .brands-table th,
+  .brands-table td {
+    padding: 12px 10px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-brands-container {
+    margin: 20px 0;
+    padding: 32px 16px;
+  }
+
+  .admin-brands-title {
+    font-size: 1.8rem;
+  }
+
+  .admin-brands-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .create-form-wrapper {
+    padding: 20px;
+  }
+
+  .form-title {
+    font-size: 1.2rem;
+  }
+
+  .form-input,
+  .form-select {
+    padding: 12px 14px;
+    font-size: 0.95rem;
+  }
+
+  .submit-button {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+
+  .table-wrapper {
+    padding: 12px;
+  }
+
+  .brands-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .brands-table th,
+  .brands-table td {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+  }
+
+  .brand-type,
+  .status-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  .action-button {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+}
+
+/* =========================
+   🎨 BACKGROUND EFFECTS
+========================= */
+.admin-brands-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(15, 32, 39, 0.95), rgba(44, 83, 100, 0.98));
+  z-index: -2;
+}
+
+.admin-brands-container::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 20% 30%, rgba(246, 211, 101, 0.1), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(240, 147, 251, 0.08), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(253, 160, 133, 0.09), transparent 40%);
+  background-size: 300% 300%;
+  animation: particleFloat 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes particleFloat {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+}

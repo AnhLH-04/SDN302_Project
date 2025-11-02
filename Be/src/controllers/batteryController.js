@@ -1,4 +1,5 @@
 import { Battery } from '../models/batteryModel.js';
+import { Brand } from '../models/brandModel.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { QueryHelper } from '../utils/queryHelper.js';
 
@@ -86,12 +87,25 @@ export const getBatteryById = async (req, res) => {
  * @route   POST /api/batteries
  * @access  Private (Member, Admin)
  */
-export const createBattery = async (req, res) => {
+export const createBattery = async (req, res, next) => {
   try {
     const batteryData = {
       ...req.body,
       sellerId: req.user._id,
     };
+
+    // Yêu cầu brand: phải được chọn và tồn tại trong Brand (type battery/both)
+    if (!batteryData.brand) {
+      return errorResponse(res, 400, 'Vui lòng chọn thương hiệu pin');
+    }
+    const brandDoc = await Brand.findOne({
+      name: batteryData.brand,
+      isActive: true,
+      type: { $in: ['battery', 'both'] },
+    });
+    if (!brandDoc) {
+      return errorResponse(res, 400, 'Thương hiệu pin không hợp lệ, vui lòng chọn trong danh sách');
+    }
 
     if (!batteryData.suggestedPrice) {
       batteryData.suggestedPrice = calculateBatterySuggestedPrice(batteryData);
@@ -103,7 +117,7 @@ export const createBattery = async (req, res) => {
       battery,
     });
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return next(error);
   }
 };
 
