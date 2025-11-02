@@ -15,7 +15,7 @@ const AdminLayout = () => {
             Dashboard
           </NavLink>
           <NavLink
-            to="/profile"
+            to="/admin/profile"
             className={({ isActive }) => (isActive ? styles.active : undefined)}
           >
             Hồ sơ của tôi
@@ -31,6 +31,12 @@ const AdminLayout = () => {
             className={({ isActive }) => (isActive ? styles.active : undefined)}
           >
             Tin đăng
+          </NavLink>
+          <NavLink
+            to="/admin/brands"
+            className={({ isActive }) => (isActive ? styles.active : undefined)}
+          >
+            Thương hiệu
           </NavLink>
           <NavLink
             to="/admin/reports"

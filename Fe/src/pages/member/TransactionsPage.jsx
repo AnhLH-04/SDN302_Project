@@ -1,40 +1,175 @@
 import { useEffect, useState } from 'react';
 import { fetchMyTransactions } from '../../services/transactionService';
+import {
+  createReview,
+  updateReview,
+  deleteReview,
+  fetchTransactionReview,
+  respondToReview
+} from '../../services/reviewService';
 import styles from './TransactionsPage.module.css';
 
 const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('all'); // 'all', 'buy', 'sell'
+  const [filter, setFilter] = useState('all');
+
+  // Modals
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [currentReview, setCurrentReview] = useState(null);
+
+  // Form states
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [responseForm, setResponseForm] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const currentUserId = getUserId();
 
   useEffect(() => {
+    loadTransactions();
+  }, []);
+
+  const loadTransactions = async () => {
     setLoading(true);
     setError('');
 
-    console.log('🔄 Fetching my transactions...');
+    try {
+      const res = await fetchMyTransactions();
+      const data = res.data.data?.transactions || res.data?.transactions || [];
+      setTransactions(data);
+    } catch (err) {
+      console.error('Error loading transactions:', err);
+      setError(err.response?.data?.message || 'Không lấy được giao dịch');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchMyTransactions()
-      .then((res) => {
-        console.log('✅ Response:', res);
-        console.log('✅ Data:', res.data);
+  // Open detail modal
+  const handleOpenDetail = async (transaction) => {
+    setSelectedTransaction(transaction);
+    setCurrentReview(null); // Reset review state
 
-        const transactions = res.data.data?.transactions || res.data?.transactions || [];
-        console.log('✅ Transactions:', transactions);
+    // Load review if exists
+    if (transaction.status === 'completed') {
+      try {
+        console.log('🔍 Loading review for transaction:', transaction._id);
+        const res = await fetchTransactionReview(transaction._id);
+        console.log('✅ Review response:', res.data);
 
-        setTransactions(transactions);
-      })
-      .catch((err) => {
-        console.error('❌ Error:', err);
-        console.error('❌ Response:', err.response);
+        const reviewData = res.data.data;
+        if (reviewData) {
+          console.log('✅ Review found:', reviewData);
+          setCurrentReview(reviewData);
+          setResponseForm(reviewData?.sellerResponse?.comment || '');
+        } else {
+          console.log('ℹ️ No review found for this transaction');
+          setCurrentReview(null);
+        }
+      } catch (err) {
+        console.error('❌ Error loading review:', err);
+        console.error('❌ Error response:', err.response?.data);
+        setCurrentReview(null);
+      }
+    }
 
-        const errorMsg = err.response?.data?.message || 'Không lấy được giao dịch';
-        setError(errorMsg);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    setShowDetailModal(true);
+  };
+
+  // Open review form modal
+  const handleOpenReviewForm = (transaction, existingReview = null) => {
+    setSelectedTransaction(transaction);
+    setCurrentReview(existingReview);
+
+    if (existingReview) {
+      setReviewForm({
+        rating: existingReview.rating,
+        comment: existingReview.comment || ''
+      });
+    } else {
+      setReviewForm({ rating: 5, comment: '' });
+    }
+
+    setShowDetailModal(false);
+    setShowReviewModal(true);
+  };
+
+  // Submit review
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!selectedTransaction) return;
+
+    const isBuyer = selectedTransaction.buyerId?._id === currentUserId;
+    const reviewedUserId = isBuyer
+      ? selectedTransaction.sellerId._id
+      : selectedTransaction.buyerId._id;
+
+    setSubmitting(true);
+
+    try {
+      if (currentReview) {
+        await updateReview(currentReview._id, reviewForm);
+        alert('✅ Cập nhật đánh giá thành công!');
+      } else {
+        await createReview({
+          transactionId: selectedTransaction._id,
+          reviewedUserId,
+          ...reviewForm,
+        });
+        alert('✅ Đánh giá thành công!');
+      }
+
+      setShowReviewModal(false);
+      await loadTransactions();
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      alert('❌ ' + (err.response?.data?.message || 'Không thể gửi đánh giá'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Delete review
+  const handleDeleteReview = async () => {
+    if (!currentReview || !window.confirm('Bạn có chắc muốn xóa đánh giá?')) return;
+
+    setSubmitting(true);
+    try {
+      await deleteReview(currentReview._id);
+      alert('✅ Đã xóa đánh giá');
+      setShowDetailModal(false);
+      await loadTransactions();
+    } catch (err) {
+      console.error('Error deleting review:', err);
+      alert('❌ ' + (err.response?.data?.message || 'Không thể xóa'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Submit seller response
+  const handleSubmitResponse = async (e) => {
+    e.preventDefault();
+    if (!currentReview || !responseForm.trim()) return;
+
+    setSubmitting(true);
+    try {
+      await respondToReview(currentReview._id, { comment: responseForm });
+      alert('✅ Phản hồi thành công!');
+
+      // Reload review
+      const res = await fetchTransactionReview(selectedTransaction._id);
+      setCurrentReview(res.data.data);
+    } catch (err) {
+      console.error('Error submitting response:', err);
+      alert('❌ ' + (err.response?.data?.message || 'Không thể gửi phản hồi'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className={styles['transactions-container']}>
@@ -84,147 +219,292 @@ const TransactionsPage = () => {
           </p>
         </div>
       ) : (
-        <div className={styles['transactions-table']}>
+        <div className={styles['transactions-grid']}>
           {getFilteredTransactions().map((t) => {
             const isBuyer = t.buyerId?._id === currentUserId;
-            const isSeller = t.sellerId?._id === currentUserId;
 
             return (
-              <div key={t._id} className={styles['transaction-card']}>
-                {/* Badge hiển thị vai trò */}
-                <div className={styles['role-badge-container']}>
-                  {isBuyer && <span className={styles['role-badge-buyer']}>🛒 Người mua</span>}
-                  {isSeller && <span className={styles['role-badge-seller']}>💰 Người bán</span>}
-                </div>
-
-                <div className={styles['transaction-header']}>
-                  <div className={styles['product-info']}>
-                    <span className={styles['transaction-type']}>
-                      {t.itemType === 'vehicle' ? '🚗 Xe điện' : '🔋 Pin'}
-                    </span>
-                    <span className={styles['product-id']}>
-                      ID: {t.itemId?.slice(-8)}
-                    </span>
-                  </div>
-                  <span className={styles['transaction-status']}>
+              <div
+                key={t._id}
+                className={styles['transaction-card-compact']}
+                onClick={() => handleOpenDetail(t)}
+              >
+                {/* Role badge */}
+                <div className={styles['card-header']}>
+                  <span className={isBuyer ? styles['badge-buyer'] : styles['badge-seller']}>
+                    {isBuyer ? '🛒 Đã mua' : '💰 Đã bán'}
+                  </span>
+                  <span className={styles['status-badge']}>
                     {getStatusBadge(t.status)}
                   </span>
                 </div>
 
-                <div className={styles['transaction-details']}>
-                  {/* Thông tin đối tác giao dịch */}
-                  <div className={styles['partner-info']}>
-                    <div className={styles['detail-row-highlight']}>
-                      <span className={styles['label']}>
-                        {isBuyer ? '👤 Người bán:' : '👤 Người mua:'}
-                      </span>
-                      <span className={styles['value']}>
-                        {isBuyer ? t.sellerId?.name : t.buyerId?.name}
-                      </span>
-                    </div>
-                    <div className={styles['detail-row']}>
-                      <span className={styles['label']}>📧 Email:</span>
-                      <span className={styles['value']}>
-                        {isBuyer ? t.sellerId?.email : t.buyerId?.email}
-                      </span>
-                    </div>
-                    {(isBuyer ? t.sellerId?.phone : t.buyerId?.phone) && (
-                      <div className={styles['detail-row']}>
-                        <span className={styles['label']}>📱 Điện thoại:</span>
-                        <span className={styles['value']}>
-                          {isBuyer ? t.sellerId?.phone : t.buyerId?.phone}
-                        </span>
-                      </div>
-                    )}
+                {/* Product image */}
+                {t.itemId?.images?.[0] && (
+                  <div className={styles['product-image-container']}>
+                    <img
+                      src={t.itemId.images[0]}
+                      alt={t.itemId.title || 'Product'}
+                      className={styles['product-image']}
+                    />
                   </div>
+                )}
 
-                  {/* Divider */}
-                  <div className={styles['divider']}></div>
-
-                  {/* Thông tin giá */}
-                  <div className={styles['price-info']}>
-                    <div className={styles['detail-row']}>
-                      <span className={styles['label']}>💵 Giá sản phẩm:</span>
-                      <span className={styles['value']}>{t.price?.toLocaleString()}đ</span>
-                    </div>
-
-                    <div className={styles['detail-row']}>
-                      <span className={styles['label']}>💳 Hoa hồng (5%):</span>
-                      <span className={styles['value']}>{t.commission?.toLocaleString()}đ</span>
-                    </div>
-
-                    <div className={styles['detail-row-highlight']}>
-                      <span className={styles['label']}>
-                        {isBuyer ? '💰 Tổng thanh toán:' : '💰 Tổng nhận được:'}
-                      </span>
-                      <span className={styles['value-highlight']}>
-                        {isBuyer
-                          ? t.totalAmount?.toLocaleString()
-                          : t.price?.toLocaleString()}đ
-                      </span>
-                    </div>
+                {/* Product info */}
+                <div className={styles['card-body']}>
+                  <div className={styles['product-title']}>
+                    {t.itemId?.title || t.itemId?.brand || (t.itemType === 'vehicle' ? 'Xe điện' : 'Pin')}
                   </div>
-
-                  {/* Divider */}
-                  <div className={styles['divider']}></div>
-
-                  {/* Thông tin thanh toán */}
-                  <div className={styles['detail-row']}>
-                    <span className={styles['label']}>💳 Phương thức thanh toán:</span>
-                    <span className={styles['value']}>{getPaymentMethodLabel(t.paymentMethod)}</span>
-                  </div>
-
-                  {t.paymentStatus && (
-                    <div className={styles['detail-row']}>
-                      <span className={styles['label']}>💸 Trạng thái thanh toán:</span>
-                      <span className={styles['value']}>{getPaymentStatusLabel(t.paymentStatus)}</span>
+                  {t.itemId?.model && (
+                    <div className={styles['product-model']}>
+                      {t.itemId.model}
                     </div>
                   )}
-
-                  {t.notes && (
-                    <div className={styles['notes-section']}>
-                      <span className={styles['label']}>📝 Ghi chú:</span>
-                      <p className={styles['notes-text']}>{t.notes}</p>
-                    </div>
-                  )}
+                  <div className={styles['partner-name']}>
+                    {isBuyer ? t.sellerId?.name : t.buyerId?.name}
+                  </div>
+                  <div className={styles['price-main']}>
+                    {isBuyer ? t.totalAmount?.toLocaleString() : t.price?.toLocaleString()}đ
+                  </div>
                 </div>
 
-                <div className={styles['transaction-footer']}>
-                  <small>🕒 {new Date(t.createdAt).toLocaleString('vi-VN')}</small>
+                {/* Footer */}
+                <div className={styles['card-footer']}>
+                  <small>{new Date(t.createdAt).toLocaleDateString('vi-VN')}</small>
+                  <button className={styles['btn-view-detail']}>
+                    Chi tiết →
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedTransaction && (
+        <div className={styles['modal-overlay']} onClick={() => setShowDetailModal(false)}>
+          <div className={styles['modal-content-large']} onClick={(e) => e.stopPropagation()}>
+            <div className={styles['modal-header']}>
+              <h2>Chi tiết giao dịch</h2>
+              <button onClick={() => setShowDetailModal(false)} className={styles['btn-close-modal']}>
+                ✕
+              </button>
+            </div>
+
+            <div className={styles['modal-body']}>
+              {/* Product Image */}
+              {selectedTransaction.itemId?.images?.[0] && (
+                <div className={styles['modal-product-image']}>
+                  <img
+                    src={selectedTransaction.itemId.images[0]}
+                    alt={selectedTransaction.itemId.title || 'Product'}
+                  />
+                </div>
+              )}
+
+              {/* Product details */}
+              <div className={styles['detail-section']}>
+                <h3>Thông tin sản phẩm</h3>
+                <div className={styles['detail-grid']}>
+                  <div><strong>Tên:</strong> {selectedTransaction.itemId?.title || 'N/A'}</div>
+                  {selectedTransaction.itemId?.brand && (
+                    <div><strong>Hãng:</strong> {selectedTransaction.itemId.brand}</div>
+                  )}
+                  {selectedTransaction.itemId?.model && (
+                    <div><strong>Model:</strong> {selectedTransaction.itemId.model}</div>
+                  )}
+                  <div><strong>Loại:</strong> {selectedTransaction.itemType === 'vehicle' ? 'Xe điện' : 'Pin'}</div>
+                </div>
+              </div>
+
+              {/* Transaction details */}
+              <div className={styles['detail-section']}>
+                <h3>Thông tin giao dịch</h3>
+                <div className={styles['detail-grid']}>
+                  <div><strong>Trạng thái:</strong> {getStatusBadge(selectedTransaction.status)}</div>
+                  <div><strong>Giá sản phẩm:</strong> {selectedTransaction.price?.toLocaleString()}đ</div>
+                  <div><strong>Hoa hồng:</strong> {selectedTransaction.commission?.toLocaleString()}đ</div>
+                  <div><strong>Tổng:</strong> {selectedTransaction.totalAmount?.toLocaleString()}đ</div>
+                  <div><strong>Thanh toán:</strong> {getPaymentMethodLabel(selectedTransaction.paymentMethod)}</div>
+                </div>
+              </div>
+
+              {/* Partner info */}
+              <div className={styles['detail-section']}>
+                <h3>
+                  {selectedTransaction.buyerId?._id === currentUserId ? 'Người bán' : 'Người mua'}
+                </h3>
+                <div className={styles['detail-grid']}>
+                  <div><strong>Tên:</strong> {
+                    selectedTransaction.buyerId?._id === currentUserId
+                      ? selectedTransaction.sellerId?.name
+                      : selectedTransaction.buyerId?.name
+                  }</div>
+                  <div><strong>Email:</strong> {
+                    selectedTransaction.buyerId?._id === currentUserId
+                      ? selectedTransaction.sellerId?.email
+                      : selectedTransaction.buyerId?.email
+                  }</div>
+                </div>
+              </div>
+
+              {/* Review section */}
+              {selectedTransaction.status === 'completed' && (
+                <div className={styles['detail-section']}>
+                  <h3>Đánh giá</h3>
+
+                  {currentReview ? (
+                    <div className={styles['review-display']}>
+                      <div className={styles['review-header']}>
+                        <div>
+                          <strong>{currentReview.reviewerId?.name}</strong>
+                          <div className={styles['star-rating']}>
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <span key={star} className={star <= currentReview.rating ? styles['star-filled'] : styles['star-empty']}>
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <small>{new Date(currentReview.createdAt).toLocaleDateString('vi-VN')}</small>
+                      </div>
+
+                      {currentReview.comment && (
+                        <p className={styles['review-comment']}>{currentReview.comment}</p>
+                      )}
+
+                      {/* Seller response */}
+                      {currentReview.sellerResponse && (
+                        <div className={styles['seller-response']}>
+                          <strong>Phản hồi từ người bán:</strong>
+                          <p>{currentReview.sellerResponse.comment}</p>
+                          <small>{new Date(currentReview.sellerResponse.respondedAt).toLocaleDateString('vi-VN')}</small>
+                        </div>
+                      )}
+
+                      {/* Buyer actions */}
+                      {currentReview.reviewerId._id === currentUserId && (
+                        <div className={styles['review-actions']}>
+                          <button
+                            onClick={() => handleOpenReviewForm(selectedTransaction, currentReview)}
+                            className={styles['btn-edit']}
+                          >
+                            ✏️ Sửa
+                          </button>
+                          <button
+                            onClick={handleDeleteReview}
+                            className={styles['btn-delete']}
+                            disabled={submitting}
+                          >
+                            🗑️ Xóa
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Seller response form */}
+                      {selectedTransaction.sellerId?._id === currentUserId && (
+                        <form onSubmit={handleSubmitResponse} className={styles['response-form']}>
+                          <label>
+                            {currentReview.sellerResponse ? 'Chỉnh sửa phản hồi:' : 'Phản hồi đánh giá:'}
+                          </label>
+                          <textarea
+                            value={responseForm}
+                            onChange={(e) => setResponseForm(e.target.value)}
+                            placeholder="Viết phản hồi..."
+                            rows="3"
+                            required
+                          />
+                          <button type="submit" disabled={submitting || !responseForm.trim()}>
+                            {submitting ? 'Đang gửi...' : 'Gửi phản hồi'}
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  ) : (
+                    // No review yet
+                    <div>
+                      {selectedTransaction.buyerId?._id === currentUserId ? (
+                        <button
+                          onClick={() => handleOpenReviewForm(selectedTransaction)}
+                          className={styles['btn-create-review']}
+                        >
+                          ⭐ Đánh giá ngay
+                        </button>
+                      ) : (
+                        <p className={styles['no-review']}>Chưa có đánh giá</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Form Modal */}
+      {showReviewModal && selectedTransaction && (
+        <div className={styles['modal-overlay']} onClick={() => setShowReviewModal(false)}>
+          <div className={styles['modal-content']} onClick={(e) => e.stopPropagation()}>
+            <h2>{currentReview ? 'Chỉnh sửa đánh giá' : 'Đánh giá'}</h2>
+
+            <form onSubmit={handleSubmitReview} className={styles['review-form']}>
+              <div className={styles['form-group']}>
+                <label>Đánh giá:</label>
+                <div className={styles['star-rating']}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <span
+                      key={star}
+                      className={star <= reviewForm.rating ? styles['star-filled'] : styles['star-empty']}
+                      onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                      style={{ cursor: 'pointer', fontSize: '32px' }}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles['form-group']}>
+                <label>Nhận xét:</label>
+                <textarea
+                  value={reviewForm.comment}
+                  onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                  placeholder="Chia sẻ trải nghiệm của bạn..."
+                  rows="4"
+                />
+              </div>
+
+              <div className={styles['form-actions']}>
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className={styles['btn-cancel']}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className={styles['btn-submit']}
+                  disabled={submitting}
+                >
+                  {submitting ? 'Đang gửi...' : currentReview ? 'Cập nhật' : 'Gửi đánh giá'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
-  // Filter transactions based on selected tab
   function getFilteredTransactions() {
-    console.log('🔍 Filtering transactions...');
-    console.log('🔍 Current filter:', filter);
-    console.log('🔍 Current user ID:', currentUserId);
-    console.log('🔍 Total transactions:', transactions.length);
-
     if (filter === 'buy') {
-      const buyTransactions = transactions.filter(t => {
-        const match = t.buyerId?._id === currentUserId;
-        console.log(`  Transaction ${t._id}: buyerId=${t.buyerId?._id}, match=${match}`);
-        return match;
-      });
-      console.log('🔍 Buy transactions:', buyTransactions.length);
-      return buyTransactions;
+      return transactions.filter(t => t.buyerId?._id === currentUserId);
     } else if (filter === 'sell') {
-      const sellTransactions = transactions.filter(t => {
-        const match = t.sellerId?._id === currentUserId;
-        console.log(`  Transaction ${t._id}: sellerId=${t.sellerId?._id}, match=${match}`);
-        return match;
-      });
-      console.log('🔍 Sell transactions:', sellTransactions.length);
-      return sellTransactions;
+      return transactions.filter(t => t.sellerId?._id === currentUserId);
     }
-    console.log('🔍 All transactions:', transactions.length);
     return transactions;
   }
 };

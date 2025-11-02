@@ -5,13 +5,26 @@ import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import { swaggerUi, swaggerSpec } from './config/swagger.js';
 
+// Import models first to ensure they are registered
+import './models/userModel.js';
+import './models/vehicleModel.js';
+import './models/batteryModel.js';
+import './models/transactionModel.js';
+import './models/reviewModel.js';
+import './models/paymentModel.js';
+import './models/favoriteModel.js';
+import './models/reportModel.js';
+import './models/brandModel.js';
+
 // Import routes
 import authRoutes from './routes/authRoutes.js';
 import vehicleRoutes from './routes/vehicleRoutes.js';
 import batteryRoutes from './routes/batteryRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
+import brandRoutes from './routes/brandRoutes.js';
 
 // Import middlewares
 import { errorHandler, notFound } from './middlewares/errorHandler.js';
@@ -36,11 +49,15 @@ app.get('/api/swagger.json', (req, res) => {
 });
 
 // Swagger Documentation - MUST be before other routes
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+//   customCss: `
+
 app.use(
   '/api-docs',
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
     customCss: `
+
     .swagger-ui .topbar { display: none }
     .swagger-ui .info { margin: 30px 0; }
     .swagger-ui .info h2 { color: #3b4151; font-size: 28px; }
@@ -75,6 +92,26 @@ app.use(
       background-color: #3eb87c;
     }
   `,
+
+    //   customSiteTitle: 'EV Platform API Documentation',
+    //   customfavIcon: '/favicon.ico',
+    //   swaggerOptions: {
+    //     persistAuthorization: true,
+    //     displayRequestDuration: true,
+    //     filter: true,
+    //     syntaxHighlight: {
+    //       activate: true,
+    //       theme: 'monokai'
+    //     },
+    //     tryItOutEnabled: true,
+    //     defaultModelsExpandDepth: 3,
+    //     defaultModelExpandDepth: 3,
+    //     docExpansion: 'list',
+    //     tagsSorter: 'alpha',
+    //     operationsSorter: 'alpha',
+    //   }
+    // }));
+
     customSiteTitle: 'EV Platform API Documentation',
     customfavIcon: '/favicon.ico',
     swaggerOptions: {
@@ -106,6 +143,7 @@ app.get('/', (req, res) => {
       vehicles: '/api/vehicles',
       batteries: '/api/batteries',
       transactions: '/api/transactions',
+      reviews: '/api/reviews',
       admin: '/api/admin',
       favorites: '/api/favorites',
       docs: '/api-docs',
@@ -118,8 +156,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/batteries', batteryRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/brands', brandRoutes);
 
 // Error handling
 app.use(notFound);

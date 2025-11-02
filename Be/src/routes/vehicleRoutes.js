@@ -108,7 +108,7 @@ router.get('/', optionalAuth, getVehicles);
  *       404:
  *         description: Vehicle not found
  */
-router.get('/:id', getVehicleById);
+router.get('/:id', optionalAuth, getVehicleById);
 
 // Protected routes
 

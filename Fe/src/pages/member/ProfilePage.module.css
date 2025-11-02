@@ -22,12 +22,10 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(
-    circle at center,
-    rgba(246, 211, 101, 0.15) 0%,
-    rgba(253, 160, 133, 0.12) 50%,
-    transparent 70%
-  );
+  background: radial-gradient(circle at center,
+      rgba(246, 211, 101, 0.15) 0%,
+      rgba(253, 160, 133, 0.12) 50%,
+      transparent 70%);
   animation: rotate 20s linear infinite;
 }
 
@@ -35,6 +33,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -57,10 +56,12 @@
 }
 
 @keyframes particleFloat {
+
   0%,
   100% {
     background-position: 0% 0%;
   }
+
   50% {
     background-position: 100% 100%;
   }
@@ -125,6 +126,43 @@
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(246, 211, 101, 0.35);
   transform: translateX(4px);
+}
+
+/* =========================
+   ⭐ RATING SECTION
+========================= */
+.ratingSection {
+  margin: 20px 0;
+  padding: 16px 20px;
+  background: rgba(246, 211, 101, 0.15);
+  border-radius: 12px;
+  border: 1px solid rgba(246, 211, 101, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+.star {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.starActive {
+  font-size: 18px;
+  color: #ffc107;
+  text-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+
+.ratingText {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: 4px;
 }
 
 /* =========================
@@ -332,6 +370,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

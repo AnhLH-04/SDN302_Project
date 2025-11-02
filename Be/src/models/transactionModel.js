@@ -60,8 +60,15 @@ const transactionSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
     }
 );
+
+// Virtual field to get capitalized model name for populate
+transactionSchema.virtual('itemModel').get(function () {
+    return this.itemType === 'vehicle' ? 'Vehicle' : 'Battery';
+});
 
 // Calculate totalAmount before save
 transactionSchema.pre('save', function (next) {

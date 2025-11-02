@@ -1,4 +1,5 @@
 import { Battery } from '../models/batteryModel.js';
+import { Brand } from '../models/brandModel.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { QueryHelper } from '../utils/queryHelper.js';
 
@@ -21,14 +22,18 @@ export const getBatteries = async (req, res) => {
       });
     }
 
+    // Chỉ hiển thị pin available và đã được duyệt cho guest/member
     if (!req.user || req.user.role !== 'admin') {
-      queryHelper.query = queryHelper.query.find({ status: 'available' });
+      queryHelper.query = queryHelper.query.find({ status: 'available', isVerified: true });
     }
 
     queryHelper.query = queryHelper.query.populate('sellerId', 'name email phone avatar');
 
     const batteries = await queryHelper.query;
-    const total = await Battery.countDocuments();
+    // Count tổng theo cùng filter của query hiện tại
+    const total = await Battery.countDocuments(
+      queryHelper.query.getFilter ? queryHelper.query.getFilter() : {}
+    );
 
     return successResponse(res, 200, 'Lấy danh sách pin thành công', {
       batteries,
@@ -57,6 +62,18 @@ export const getBatteryById = async (req, res) => {
       return errorResponse(res, 404, 'Pin không tồn tại');
     }
 
+    // Nếu tin chưa được duyệt, chỉ cho phép chủ sở hữu hoặc admin xem
+    if (!battery.isVerified) {
+      const user = req.user;
+      const isAdmin = user && user.role === 'admin';
+      const sellerId =
+        battery.sellerId && battery.sellerId._id ? battery.sellerId._id : battery.sellerId;
+      const isOwner = user && sellerId && sellerId.toString() === user._id.toString();
+      if (!isAdmin && !isOwner) {
+        return errorResponse(res, 403, 'Tin chưa được admin duyệt');
+      }
+    }
+
     return successResponse(res, 200, 'Lấy thông tin pin thành công', {
       battery,
     });
@@ -70,12 +87,25 @@ export const getBatteryById = async (req, res) => {
  * @route   POST /api/batteries
  * @access  Private (Member, Admin)
  */
-export const createBattery = async (req, res) => {
+export const createBattery = async (req, res, next) => {
   try {
     const batteryData = {
       ...req.body,
       sellerId: req.user._id,
     };
+
+    // Yêu cầu brand: phải được chọn và tồn tại trong Brand (type battery/both)
+    if (!batteryData.brand) {
+      return errorResponse(res, 400, 'Vui lòng chọn thương hiệu pin');
+    }
+    const brandDoc = await Brand.findOne({
+      name: batteryData.brand,
+      isActive: true,
+      type: { $in: ['battery', 'both'] },
+    });
+    if (!brandDoc) {
+      return errorResponse(res, 400, 'Thương hiệu pin không hợp lệ, vui lòng chọn trong danh sách');
+    }
 
     if (!batteryData.suggestedPrice) {
       batteryData.suggestedPrice = calculateBatterySuggestedPrice(batteryData);
@@ -87,7 +117,7 @@ export const createBattery = async (req, res) => {
       battery,
     });
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return next(error);
   }
 };
 
@@ -136,6 +166,11 @@ export const deleteBattery = async (req, res) => {
 
     if (battery.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return errorResponse(res, 403, 'Bạn không có quyền xóa pin này');
+    }
+
+    // Không cho phép xóa nếu pin đang giao dịch hoặc đã bán (áp dụng cho user; admin có thể override)
+    if (req.user.role !== 'admin' && (battery.status === 'pending' || battery.status === 'sold')) {
+      return errorResponse(res, 400, 'Không thể xóa tin khi đang giao dịch (pending) hoặc đã bán');
     }
 
     await Battery.findByIdAndDelete(req.params.id);

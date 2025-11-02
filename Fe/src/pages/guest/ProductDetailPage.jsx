@@ -4,6 +4,8 @@ import styles from './ProductDetailPage.module.css';
 import { useParams } from 'react-router-dom';
 import { fetchVehicleById, fetchBatteryById } from '../../services/productService';
 import { createTransaction } from '../../services/transactionService';
+import { fetchProductReviews } from '../../services/reviewService';
+import ReviewList from '../../components/ReviewList';
 
 const ProductDetailPage = () => {
   // Biến trạng thái mua hàng
@@ -15,6 +17,9 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -37,6 +42,49 @@ const ProductDetailPage = () => {
       setLoading(false);
     };
     fetchData();
+
+    // Fetch reviews - separate function
+    const loadReviews = async () => {
+      if (!type || !id) {
+        console.log('Skipping reviews - missing type or id');
+        return;
+      }
+
+      setReviewsLoading(true);
+      try {
+        console.log(`Fetching reviews for ${type}/${id}`);
+        const res = await fetchProductReviews(type, id);
+        console.log('Reviews API Full Response:', res);
+
+        // Try multiple possible response structures
+        let reviewsData = [];
+        let statsData = null;
+
+        if (res?.data?.data) {
+          reviewsData = res.data.data.reviews || [];
+          statsData = res.data.data.stats || null;
+        } else if (res?.data) {
+          reviewsData = res.data.reviews || [];
+          statsData = res.data.stats || null;
+        }
+
+        console.log('Setting reviews:', reviewsData);
+        console.log('Setting stats:', statsData);
+
+        setReviews(reviewsData);
+        setReviewStats(statsData);
+      } catch (err) {
+        console.error('Error loading reviews:', err);
+        console.error('Error details:', err.response?.data || err.message);
+        // Silently fail - don't crash the page
+        setReviews([]);
+        setReviewStats(null);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    loadReviews();
   }, [id, type]);
 
   if (loading) return <div className={styles.loading}>Đang tải...</div>;
@@ -261,6 +309,17 @@ const ProductDetailPage = () => {
           ❌ Sản phẩm đã được bán
         </div>
       )}
+
+      {/* Reviews Section */}
+      <div className={styles.section}>
+        <h3 className={styles.sectionTitle}>Đánh giá từ người mua</h3>
+        <ReviewList
+          reviews={reviews}
+          stats={reviewStats}
+          loading={reviewsLoading}
+          showActions={false}
+        />
+      </div>
     </div>
   );
 };

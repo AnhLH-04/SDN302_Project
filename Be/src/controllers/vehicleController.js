@@ -1,4 +1,5 @@
 import { Vehicle } from '../models/vehicleModel.js';
+import { Brand } from '../models/brandModel.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { QueryHelper } from '../utils/queryHelper.js';
 
@@ -23,9 +24,9 @@ export const getVehicles = async (req, res) => {
       });
     }
 
-    // Chỉ hiển thị xe available cho guest/member
+    // Chỉ hiển thị xe available và đã được duyệt (isVerified) cho guest/member
     if (!req.user || req.user.role !== 'admin') {
-      queryHelper.query = queryHelper.query.find({ status: 'available' });
+      queryHelper.query = queryHelper.query.find({ status: 'available', isVerified: true });
     }
 
     // Populate seller info
@@ -33,7 +34,7 @@ export const getVehicles = async (req, res) => {
 
     const vehicles = await queryHelper.query;
 
-    // Count total
+    // Count total theo cùng filter của query hiện tại
     const total = await Vehicle.countDocuments(
       queryHelper.query.getFilter ? queryHelper.query.getFilter() : {}
     );
@@ -65,6 +66,18 @@ export const getVehicleById = async (req, res) => {
       return errorResponse(res, 404, 'Xe không tồn tại');
     }
 
+    // Nếu tin chưa được admin duyệt, chỉ cho phép chủ sở hữu hoặc admin xem
+    if (!vehicle.isVerified) {
+      const user = req.user;
+      const isAdmin = user && user.role === 'admin';
+      const sellerId =
+        vehicle.sellerId && vehicle.sellerId._id ? vehicle.sellerId._id : vehicle.sellerId;
+      const isOwner = user && sellerId && sellerId.toString() === user._id.toString();
+      if (!isAdmin && !isOwner) {
+        return errorResponse(res, 403, 'Tin chưa được admin duyệt');
+      }
+    }
+
     // Tăng view count
     vehicle.viewCount += 1;
     await vehicle.save();
@@ -82,12 +95,25 @@ export const getVehicleById = async (req, res) => {
  * @route   POST /api/vehicles
  * @access  Private (Member, Admin)
  */
-export const createVehicle = async (req, res) => {
+export const createVehicle = async (req, res, next) => {
   try {
     const vehicleData = {
       ...req.body,
       sellerId: req.user._id,
     };
+
+    // Xác thực brand: phải tồn tại trong Brand (type vehicle/both)
+    if (!vehicleData.brand) {
+      return errorResponse(res, 400, 'Vui lòng chọn thương hiệu');
+    }
+    const brandDoc = await Brand.findOne({
+      name: vehicleData.brand,
+      isActive: true,
+      type: { $in: ['vehicle', 'both'] },
+    });
+    if (!brandDoc) {
+      return errorResponse(res, 400, 'Thương hiệu không hợp lệ, vui lòng chọn trong danh sách');
+    }
 
     // AI suggest price (mô phỏng đơn giản)
     if (!vehicleData.suggestedPrice) {
@@ -100,7 +126,8 @@ export const createVehicle = async (req, res) => {
       vehicle,
     });
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    // Đẩy sang errorHandler để trả mã lỗi phù hợp (400 cho ValidationError)
+    return next(error);
   }
 };
 
@@ -151,6 +178,11 @@ export const deleteVehicle = async (req, res) => {
     // Kiểm tra quyền
     if (vehicle.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return errorResponse(res, 403, 'Bạn không có quyền xóa xe này');
+    }
+
+    // Không cho phép xóa nếu xe đang giao dịch hoặc đã bán (áp dụng cho user; admin có thể override)
+    if (req.user.role !== 'admin' && (vehicle.status === 'pending' || vehicle.status === 'sold')) {
+      return errorResponse(res, 400, 'Không thể xóa tin khi đang giao dịch (pending) hoặc đã bán');
     }
 
     await Vehicle.findByIdAndDelete(req.params.id);

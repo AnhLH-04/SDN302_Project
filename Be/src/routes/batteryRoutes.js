@@ -1,12 +1,12 @@
 import express from 'express';
 import { body } from 'express-validator';
 import {
-    getBatteries,
-    getBatteryById,
-    createBattery,
-    updateBattery,
-    deleteBattery,
-    getMyBatteries,
+  getBatteries,
+  getBatteryById,
+  createBattery,
+  updateBattery,
+  deleteBattery,
+  getMyBatteries,
 } from '../controllers/batteryController.js';
 import { authenticate, optionalAuth, authorize } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
@@ -15,14 +15,12 @@ const router = express.Router();
 
 // Validation rules
 const batteryValidation = [
-    body('title').trim().notEmpty().withMessage('Vui lòng nhập tiêu đề'),
-    body('brand').notEmpty().withMessage('Vui lòng chọn hãng pin'),
-    body('capacity').isFloat({ min: 1 }).withMessage('Dung lượng pin không hợp lệ'),
-    body('health')
-        .isInt({ min: 0, max: 100 })
-        .withMessage('Tình trạng pin phải từ 0-100%'),
-    body('price').isFloat({ min: 0 }).withMessage('Giá không hợp lệ'),
-    body('location').trim().notEmpty().withMessage('Vui lòng nhập địa chỉ'),
+  body('title').trim().notEmpty().withMessage('Vui lòng nhập tiêu đề'),
+  body('brand').notEmpty().withMessage('Vui lòng chọn hãng pin'),
+  body('capacity').isFloat({ min: 1 }).withMessage('Dung lượng pin không hợp lệ'),
+  body('health').isInt({ min: 0, max: 100 }).withMessage('Tình trạng pin phải từ 0-100%'),
+  body('price').isFloat({ min: 0 }).withMessage('Giá không hợp lệ'),
+  body('location').trim().notEmpty().withMessage('Vui lòng nhập địa chỉ'),
 ];
 
 // Public routes
@@ -73,7 +71,7 @@ router.get('/', optionalAuth, getBatteries);
  *       200:
  *         description: Battery retrieved successfully
  */
-router.get('/:id', getBatteryById);
+router.get('/:id', optionalAuth, getBatteryById);
 
 // Protected routes
 
@@ -142,12 +140,12 @@ router.get('/my/batteries', authenticate, getMyBatteries);
  *         description: Battery created successfully
  */
 router.post(
-    '/',
-    authenticate,
-    authorize('member', 'admin'),
-    batteryValidation,
-    validate,
-    createBattery
+  '/',
+  authenticate,
+  authorize('member', 'admin'),
+  batteryValidation,
+  validate,
+  createBattery
 );
 
 /**

@@ -64,8 +64,16 @@ export const createTransaction = async (req, res) => {
         });
 
         // Cập nhật status sản phẩm thành pending
+        console.log('📝 Updating item status to pending:', {
+            itemType: transaction.itemType,
+            itemId: transaction.itemId,
+            currentStatus: item.status
+        });
+
         item.status = 'pending';
         await item.save();
+
+        console.log('✅ Item status updated to:', item.status);
 
         // Tạo payment record
         await Payment.create({
@@ -117,6 +125,7 @@ export const getMyTransactions = async (req, res) => {
         const transactions = await Transaction.find(query)
             .populate('buyerId', 'name email phone avatar')
             .populate('sellerId', 'name email phone avatar')
+            .populate('itemId', 'title brand model images price') // Populate product info
             .sort('-createdAt');
 
         console.log('📊 Found transactions:', transactions.length);
@@ -198,11 +207,12 @@ export const updateTransactionStatus = async (req, res) => {
             return errorResponse(res, 404, 'Giao dịch không tồn tại');
         }
 
-        // Chỉ seller hoặc admin mới được cập nhật status
-        if (
-            transaction.sellerId.toString() !== req.user._id.toString() &&
-            req.user.role !== 'admin'
-        ) {
+        // Authorization: Buyer, Seller hoặc Admin đều có thể update
+        const isBuyer = transaction.buyerId.toString() === req.user._id.toString();
+        const isSeller = transaction.sellerId.toString() === req.user._id.toString();
+        const isAdmin = req.user.role === 'admin';
+
+        if (!isBuyer && !isSeller && !isAdmin) {
             return errorResponse(res, 403, 'Bạn không có quyền cập nhật giao dịch này');
         }
 
@@ -211,6 +221,11 @@ export const updateTransactionStatus = async (req, res) => {
         if (!validStatuses.includes(status)) {
             return errorResponse(res, 400, 'Trạng thái không hợp lệ');
         }
+
+        // Business logic: Buyer confirm payment, Seller can also update
+        // pending -> confirmed (Buyer xác nhận thanh toán)
+        // confirmed -> completed (Buyer hoàn tất hoặc Seller xác nhận)
+        // any -> cancelled (Both can cancel)
 
         transaction.status = status;
 

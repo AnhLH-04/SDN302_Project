@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createVehicle, createBattery } from '../../services/productService';
+import { fetchBrands } from '../../services/brandService';
 import styles from './AddProductPage.module.css';
 
 const AddProductPage = () => {
@@ -12,7 +13,7 @@ const AddProductPage = () => {
     description: '',
     location: '',
     condition: '',
-    images: '',
+    images: [],
     // Vehicle fields
     year: '',
     mileage: '',
@@ -31,9 +32,107 @@ const AddProductPage = () => {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  // Load Cloudinary Upload Widget script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://upload-widget.cloudinary.com/global/all.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const [vehicleBrands, setVehicleBrands] = useState([]);
+  const [batteryBrands, setBatteryBrands] = useState([]);
+  const [brandsLoading, setBrandsLoading] = useState(false);
+
+  useEffect(() => {
+    // Fetch brands based on current type
+    setBrandsLoading(true);
+    const t = type === 'vehicle' ? 'vehicle' : 'battery';
+    fetchBrands(t)
+      .then((res) => {
+        const list = res?.data?.data?.brands || [];
+        if (t === 'vehicle') {
+          setVehicleBrands(list);
+          if (!form.brand && list.length > 0) setForm((f) => ({ ...f, brand: list[0].name }));
+        } else {
+          setBatteryBrands(list);
+          if (!form.brand && list.length > 0) setForm((f) => ({ ...f, brand: list[0].name }));
+        }
+      })
+      .catch(() => {
+        if (t === 'vehicle') setVehicleBrands([]);
+        else setBatteryBrands([]);
+      })
+      .finally(() => setBrandsLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
+
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  };
+
+  // Cloudinary Upload Widget
+  const openUploadWidget = () => {
+    if (!window.cloudinary) {
+      alert('Cloudinary chưa tải xong, vui lòng thử lại');
+      return;
+    }
+
+    // Lấy config từ env hoặc dùng default
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dcb9ycbhl';
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'ml_default';
+
+    setUploadingImages(true);
+
+    window.cloudinary.openUploadWidget(
+      {
+        cloudName,
+        uploadPreset,
+        sources: ['local', 'url', 'camera'],
+        multiple: true,
+        maxFiles: 10,
+        maxImageFileSize: 5000000, // 5MB
+        cropping: false,
+        folder: 'ev-platform/products',
+        resourceType: 'image',
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+        showSkipCropButton: false,
+      },
+      (error, result) => {
+        setUploadingImages(false);
+
+        if (error) {
+          console.error('Upload error:', error);
+          setError('Lỗi khi upload ảnh: ' + error.message);
+          return;
+        }
+
+        if (result.event === 'success') {
+          const newImageUrl = result.info.secure_url;
+          setForm((f) => ({
+            ...f,
+            images: [...f.images, newImageUrl],
+          }));
+        }
+
+        if (result.event === 'close') {
+          console.log('Upload widget closed');
+        }
+      }
+    );
+  };
+
+  const removeImage = (indexToRemove) => {
+    setForm((f) => ({
+      ...f,
+      images: f.images.filter((_, index) => index !== indexToRemove),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -43,10 +142,16 @@ const AddProductPage = () => {
     setSuccess('');
 
     try {
+      // Images đã là array rồi, không cần parse
+      const imageArray = form.images;
       // Parse images từ string thành array
-      const imageArray = form.images
-        ? form.images.split(',').map((url) => url.trim()).filter((url) => url)
-        : [];
+//       const imageArray = form.images
+//         ? form.images
+//             .split(',')
+//             .map((url) => url.trim())
+//             .filter((url) => url)
+//         : [];
+
 
       const payload = {
         title: form.name,
@@ -91,7 +196,7 @@ const AddProductPage = () => {
         description: '',
         location: '',
         condition: '',
-        images: '',
+        images: [],
         year: '',
         mileage: '',
         batteryCapacity: '',
@@ -128,10 +233,7 @@ const AddProductPage = () => {
         <option value="battery">🔋 Pin</option>
       </select>
 
-      <form
-        onSubmit={handleSubmit}
-        className={styles['add-product-form']}
-      >
+      <form onSubmit={handleSubmit} className={styles['add-product-form']}>
         {/* Thông tin chung */}
         <input
           name="name"
@@ -148,12 +250,25 @@ const AddProductPage = () => {
           onChange={handleChange}
         />
 
-        <input
-          name="brand"
-          placeholder="Hãng (VD: Tesla, VinFast, CATL)"
-          value={form.brand}
-          onChange={handleChange}
-        />
+        {type === 'vehicle' ? (
+          <select name="brand" value={form.brand} onChange={handleChange} required>
+            <option value="">Chọn hãng xe *</option>
+            {vehicleBrands.map((b) => (
+              <option key={`${b._id}-${b.name}`} value={b.name}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <select name="brand" value={form.brand} onChange={handleChange} required>
+            <option value="">Chọn hãng pin *</option>
+            {batteryBrands.map((b) => (
+              <option key={`${b._id}-${b.name}`} value={b.name}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        )}
 
         <input
           name="price"
@@ -184,18 +299,40 @@ const AddProductPage = () => {
         {/* URL hình ảnh */}
         <div className={styles['image-input-section']}>
           <label className={styles['image-label']}>
-            📸 URL hình ảnh (phân cách bằng dấu phẩy):
+            📸 Hình ảnh sản phẩm:
           </label>
-          <textarea
-            name="images"
-            placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-            value={form.images}
-            onChange={handleChange}
-            rows="3"
-            className={styles['textarea']}
-          />
+
+          <button
+            type="button"
+            onClick={openUploadWidget}
+            disabled={uploadingImages || form.images.length >= 10}
+            className={styles['upload-btn']}
+          >
+            {uploadingImages ? '⏳ Đang tải...' : '📤 Upload ảnh'}
+          </button>
+
+          {form.images.length > 0 && (
+            <div className={styles['image-preview-grid']}>
+              {form.images.map((url, index) => (
+                <div key={index} className={styles['image-preview-item']}>
+                  <img src={url} alt={`Preview ${index + 1}`} />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className={styles['remove-image-btn']}
+                    title="Xóa ảnh"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <small className={styles['help-text']}>
-            💡 Mẹo: Upload ảnh lên <a href="https://imgur.com" target="_blank" rel="noopener noreferrer">Imgur</a> hoặc <a href="https://postimages.org" target="_blank" rel="noopener noreferrer">PostImages</a> để lấy URL
+
+            💡 Bạn có thể upload tối đa 10 ảnh. Định dạng: JPG, PNG, WEBP (Max 5MB/ảnh)
+
           </small>
         </div>
 
@@ -329,7 +466,7 @@ const AddProductPage = () => {
           </>
         )}
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading || (type === 'vehicle' && brandsLoading)}>
           {loading ? (
             <>
               <span className={styles['loading-spinner']}></span>
@@ -342,6 +479,16 @@ const AddProductPage = () => {
 
         {error && <div className={styles['error-message']}>{error}</div>}
         {success && <div className={styles['success-message']}>{success}</div>}
+        {type === 'vehicle' && !brandsLoading && vehicleBrands.length === 0 && (
+          <div className={styles['error-message']}>
+            Hiện chưa có thương hiệu xe. Vui lòng liên hệ quản trị viên để thêm brand.
+          </div>
+        )}
+        {type === 'battery' && !brandsLoading && batteryBrands.length === 0 && (
+          <div className={styles['error-message']}>
+            Hiện chưa có thương hiệu pin. Vui lòng liên hệ quản trị viên để thêm brand.
+          </div>
+        )}
       </form>
     </div>
   );
