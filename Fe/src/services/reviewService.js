@@ -20,3 +20,11 @@ export const updateReview = (id, data) => axiosClient.put(`${API_BASE}/${id}`, d
 
 // Delete a review
 export const deleteReview = (id) => axiosClient.delete(`${API_BASE}/${id}`);
+
+// Get review for a specific transaction
+export const fetchTransactionReview = (transactionId) =>
+    axiosClient.get(`${API_BASE}/transaction/${transactionId}`);
+
+// Respond to a review (seller only)
+export const respondToReview = (reviewId, data) =>
+    axiosClient.put(`${API_BASE}/${reviewId}/response`, data);

@@ -125,6 +125,7 @@ export const getMyTransactions = async (req, res) => {
         const transactions = await Transaction.find(query)
             .populate('buyerId', 'name email phone avatar')
             .populate('sellerId', 'name email phone avatar')
+            .populate('itemId', 'title brand model images price') // Populate product info
             .sort('-createdAt');
 
         console.log('📊 Found transactions:', transactions.length);

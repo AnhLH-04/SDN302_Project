@@ -7,6 +7,8 @@ import {
     getMyReviews,
     updateReview,
     deleteReview,
+    getTransactionReview,
+    respondToReview,
 } from '../controllers/reviewController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
@@ -174,6 +176,14 @@ router.get('/my', authenticate, getMyReviews);
  *         description: Review updated successfully
  */
 router.put('/:id', authenticate, updateReviewValidation, validate, updateReview);
+
+// Get review for transaction
+router.get('/transaction/:transactionId', authenticate, getTransactionReview);
+
+// Respond to review (seller only)
+router.put('/:id/response', authenticate, [
+    body('comment').notEmpty().withMessage('Nội dung phản hồi không được để trống')
+], validate, respondToReview);
 
 /**
  * @swagger
