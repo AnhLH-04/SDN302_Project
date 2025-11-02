@@ -1,4 +1,5 @@
 import { Vehicle } from '../models/vehicleModel.js';
+import { Brand } from '../models/brandModel.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { QueryHelper } from '../utils/queryHelper.js';
 
@@ -94,12 +95,25 @@ export const getVehicleById = async (req, res) => {
  * @route   POST /api/vehicles
  * @access  Private (Member, Admin)
  */
-export const createVehicle = async (req, res) => {
+export const createVehicle = async (req, res, next) => {
   try {
     const vehicleData = {
       ...req.body,
       sellerId: req.user._id,
     };
+
+    // Xác thực brand: phải tồn tại trong Brand (type vehicle/both)
+    if (!vehicleData.brand) {
+      return errorResponse(res, 400, 'Vui lòng chọn thương hiệu');
+    }
+    const brandDoc = await Brand.findOne({
+      name: vehicleData.brand,
+      isActive: true,
+      type: { $in: ['vehicle', 'both'] },
+    });
+    if (!brandDoc) {
+      return errorResponse(res, 400, 'Thương hiệu không hợp lệ, vui lòng chọn trong danh sách');
+    }
 
     // AI suggest price (mô phỏng đơn giản)
     if (!vehicleData.suggestedPrice) {
@@ -112,7 +126,8 @@ export const createVehicle = async (req, res) => {
       vehicle,
     });
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    // Đẩy sang errorHandler để trả mã lỗi phù hợp (400 cho ValidationError)
+    return next(error);
   }
 };
 

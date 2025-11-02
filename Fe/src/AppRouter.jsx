@@ -20,6 +20,7 @@ import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminPostsPage from './pages/admin/AdminPostsPage';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
 import AdminInventoryPage from './pages/admin/AdminInventoryPage';
+import AdminBrandsPage from './pages/admin/AdminBrandsPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
@@ -167,6 +168,7 @@ function AppRouter() {
             <Route path="posts" element={<AdminPostsPage />} />
             <Route path="reports" element={<AdminReportsPage />} />
             <Route path="inventory" element={<AdminInventoryPage />} />
+            <Route path="brands" element={<AdminBrandsPage />} />
           </Route>
           {/* Alias: direct /inventory route redirects to admin inventory */}
           <Route path="/inventory" element={<Navigate to="/admin/inventory" replace />} />

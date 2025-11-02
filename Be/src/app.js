@@ -14,6 +14,7 @@ import './models/reviewModel.js';
 import './models/paymentModel.js';
 import './models/favoriteModel.js';
 import './models/reportModel.js';
+import './models/brandModel.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
@@ -23,7 +24,7 @@ import transactionRoutes from './routes/transactionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
-
+import brandRoutes from './routes/brandRoutes.js';
 
 // Import middlewares
 import { errorHandler, notFound } from './middlewares/errorHandler.js';
@@ -92,24 +93,24 @@ app.use(
     }
   `,
 
-//   customSiteTitle: 'EV Platform API Documentation',
-//   customfavIcon: '/favicon.ico',
-//   swaggerOptions: {
-//     persistAuthorization: true,
-//     displayRequestDuration: true,
-//     filter: true,
-//     syntaxHighlight: {
-//       activate: true,
-//       theme: 'monokai'
-//     },
-//     tryItOutEnabled: true,
-//     defaultModelsExpandDepth: 3,
-//     defaultModelExpandDepth: 3,
-//     docExpansion: 'list',
-//     tagsSorter: 'alpha',
-//     operationsSorter: 'alpha',
-//   }
-// }));
+    //   customSiteTitle: 'EV Platform API Documentation',
+    //   customfavIcon: '/favicon.ico',
+    //   swaggerOptions: {
+    //     persistAuthorization: true,
+    //     displayRequestDuration: true,
+    //     filter: true,
+    //     syntaxHighlight: {
+    //       activate: true,
+    //       theme: 'monokai'
+    //     },
+    //     tryItOutEnabled: true,
+    //     defaultModelsExpandDepth: 3,
+    //     defaultModelExpandDepth: 3,
+    //     docExpansion: 'list',
+    //     tagsSorter: 'alpha',
+    //     operationsSorter: 'alpha',
+    //   }
+    // }));
 
     customSiteTitle: 'EV Platform API Documentation',
     customfavIcon: '/favicon.ico',
@@ -130,7 +131,6 @@ app.use(
     },
   })
 );
-
 
 // Health check
 app.get('/', (req, res) => {
@@ -159,6 +159,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/brands', brandRoutes);
 
 // Error handling
 app.use(notFound);

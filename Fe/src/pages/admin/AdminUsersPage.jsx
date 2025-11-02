@@ -48,7 +48,7 @@ const AdminUsersPage = () => {
 
   return (
     <div className={styles['admin-users-container']}>
-      <h1 className={styles['admin-users-title']}>👥 Quản lý người dùng</h1>
+      <h1 className={styles['admin-users-title']}> Quản lý người dùng</h1>
       <p className={styles['admin-users-subtitle']}>Quản lý và kiểm soát tài khoản người dùng</p>
 
       {error && <div className={styles['error-message']}>⚠️ {error}</div>}
@@ -68,11 +68,11 @@ const AdminUsersPage = () => {
           <table className={styles['admin-users-table']}>
             <thead>
               <tr>
-                <th>👤 Họ tên</th>
-                <th>📧 Email</th>
-                <th>🎭 Role</th>
-                <th>📊 Trạng thái</th>
-                <th>⚙️ Hành động</th>
+                <th> Họ tên</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Trạng thái</th>
+                <th> Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -90,14 +90,14 @@ const AdminUsersPage = () => {
                         u.role === 'admin' ? styles['role-badge-admin'] : styles['role-badge-user']
                       }
                     >
-                      {u.role === 'admin' ? '👑 Admin' : '👤 User'}
+                      {u.role === 'admin' ? ' Admin' : ' User'}
                     </span>
                   </td>
                   <td>
                     <span
                       className={u.isActive ? styles['status-active'] : styles['status-blocked']}
                     >
-                      {u.isActive ? '✅ Hoạt động' : '🚫 Bị khóa'}
+                      {u.isActive ? ' Hoạt động' : ' Bị khóa'}
                     </span>
                   </td>
                   <td>
@@ -106,10 +106,10 @@ const AdminUsersPage = () => {
                         className={u.isActive ? styles['btn-block'] : styles['btn-unblock']}
                         onClick={() => handleBlock(u._id, !u.isActive)}
                       >
-                        {u.isActive ? '🔒 Khóa' : '🔓 Mở khóa'}
+                        {u.isActive ? ' Khóa' : ' Mở khóa'}
                       </button>
                       <button className={styles['btn-delete']} onClick={() => handleDelete(u._id)}>
-                        🗑️ Xóa
+                        Xóa
                       </button>
                     </div>
                   </td>
