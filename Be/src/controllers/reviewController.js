@@ -276,6 +276,106 @@ export const updateReview = async (req, res) => {
 };
 
 /**
+ * @desc    Lấy review của transaction (cho cả buyer và seller)
+ * @route   GET /api/reviews/transaction/:transactionId
+ * @access  Private
+ */
+export const getTransactionReview = async (req, res) => {
+    try {
+        const { transactionId } = req.params;
+
+        console.log('🔍 Getting review for transaction:', transactionId);
+        console.log('👤 User ID:', req.user._id);
+
+        const transaction = await Transaction.findById(transactionId);
+        if (!transaction) {
+            console.log('❌ Transaction not found');
+            return errorResponse(res, 404, 'Giao dịch không tồn tại');
+        }
+
+        console.log('📦 Transaction found:', {
+            id: transaction._id,
+            buyerId: transaction.buyerId,
+            sellerId: transaction.sellerId,
+            status: transaction.status
+        });
+
+        // Kiểm tra quyền
+        const isBuyer = transaction.buyerId.toString() === req.user._id.toString();
+        const isSeller = transaction.sellerId.toString() === req.user._id.toString();
+
+        console.log('🔐 Permission check:', { isBuyer, isSeller });
+
+        if (!isBuyer && !isSeller) {
+            console.log('❌ User is neither buyer nor seller');
+            return errorResponse(res, 403, 'Bạn không có quyền xem đánh giá này');
+        }
+
+        const review = await Review.findOne({ transactionId })
+            .populate('reviewerId', 'name email avatar')
+            .populate('reviewedUserId', 'name email avatar');
+
+        console.log('📝 Review found:', review ? {
+            id: review._id,
+            reviewerId: review.reviewerId?._id,
+            reviewedUserId: review.reviewedUserId?._id,
+            rating: review.rating,
+            hasResponse: !!review.sellerResponse
+        } : 'null');
+
+        return successResponse(res, 200, 'Lấy đánh giá thành công', review);
+    } catch (error) {
+        console.error('Error in getTransactionReview:', error);
+        return errorResponse(res, 500, error.message || 'Lỗi server');
+    }
+};
+
+/**
+ * @desc    Phản hồi đánh giá (seller)
+ * @route   PUT /api/reviews/:id/response
+ * @access  Private
+ */
+export const respondToReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { comment } = req.body;
+
+        if (!comment || !comment.trim()) {
+            return errorResponse(res, 400, 'Nội dung phản hồi không được để trống');
+        }
+
+        const review = await Review.findById(id).populate('transactionId');
+        if (!review) {
+            return errorResponse(res, 404, 'Đánh giá không tồn tại');
+        }
+
+        const transaction = review.transactionId;
+        const isSeller = transaction.sellerId.toString() === req.user._id.toString();
+
+        if (!isSeller) {
+            return errorResponse(res, 403, 'Chỉ người bán mới có thể phản hồi đánh giá');
+        }
+
+        review.sellerResponse = {
+            comment: comment.trim(),
+            respondedAt: new Date(),
+        };
+
+        await review.save();
+
+        await review.populate([
+            { path: 'reviewerId', select: 'name email avatar' },
+            { path: 'reviewedUserId', select: 'name email avatar' },
+        ]);
+
+        return successResponse(res, 200, 'Phản hồi thành công', review);
+    } catch (error) {
+        console.error('Error in respondToReview:', error);
+        return errorResponse(res, 500, error.message || 'Lỗi server');
+    }
+};
+
+/**
  * @desc    Xóa review
  * @route   DELETE /api/reviews/:id
  * @access  Private

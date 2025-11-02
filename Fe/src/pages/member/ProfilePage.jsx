@@ -91,8 +91,8 @@ const ProfilePage = () => {
           <p className={styles['profile-info']}>Số điện thoại: {profile.phone}</p>
           <p className={styles['profile-info']}>Địa chỉ: {profile.address}</p>
 
-          {/* Rating section */}
-          {profile.reviewCount > 0 && (
+          {/* Rating section - only show if user has received reviews */}
+          {profile.reviewCount && profile.reviewCount > 0 && (
             <div className={styles.ratingSection}>
               <p className={styles['profile-info']}>
                 <strong>Đánh giá:</strong> {renderStars(profile.avgRating || 0)}{' '}
