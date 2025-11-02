@@ -5,7 +5,7 @@ import {
   updateReview,
   deleteReview,
   fetchTransactionReview,
-  respondToReview
+  respondToReview,
 } from '../../services/reviewService';
 import styles from './TransactionsPage.module.css';
 
@@ -87,7 +87,7 @@ const TransactionsPage = () => {
     if (existingReview) {
       setReviewForm({
         rating: existingReview.rating,
-        comment: existingReview.comment || ''
+        comment: existingReview.comment || '',
       });
     } else {
       setReviewForm({ rating: 5, comment: '' });
@@ -190,21 +190,29 @@ const TransactionsPage = () => {
           className={`${styles['filter-tab']} ${filter === 'buy' ? styles['active'] : ''}`}
           onClick={() => setFilter('buy')}
         >
-          🛒 Đã mua ({transactions.filter(t => t.buyerId?._id === currentUserId).length})
+          🛒 Đã mua ({transactions.filter((t) => t.buyerId?._id === currentUserId).length})
         </button>
         <button
           className={`${styles['filter-tab']} ${filter === 'sell' ? styles['active'] : ''}`}
           onClick={() => setFilter('sell')}
         >
-          💰 Đã bán ({transactions.filter(t => t.sellerId?._id === currentUserId).length})
+          💰 Đã bán ({transactions.filter((t) => t.sellerId?._id === currentUserId).length})
+        </button>
+        <button
+          className={`${styles['filter-tab']} ${filter === 'cancelled' ? styles['active'] : ''}`}
+          onClick={() => setFilter('cancelled')}
+          title="Chỉ hiển thị giao dịch đã hủy mà bạn là người mua"
+        >
+          ❌ Đã hủy (
+          {
+            transactions.filter((t) => t.status === 'cancelled' && t.buyerId?._id === currentUserId)
+              .length
+          }
+          )
         </button>
       </div>
 
-      {error && (
-        <div className={styles['error-message']}>
-          ⚠️ {error}
-        </div>
-      )}
+      {error && <div className={styles['error-message']}>⚠️ {error}</div>}
 
       {loading ? (
         <div className={styles['loading-container']}>
@@ -213,9 +221,26 @@ const TransactionsPage = () => {
         </div>
       ) : getFilteredTransactions().length === 0 ? (
         <div className={styles['empty-state']}>
-          <p>😔 {filter === 'buy' ? 'Bạn chưa mua sản phẩm nào' : filter === 'sell' ? 'Bạn chưa bán sản phẩm nào' : 'Bạn chưa có giao dịch nào'}</p>
+          <p>
+            😔{' '}
+            {filter === 'buy'
+              ? 'Bạn chưa mua sản phẩm nào'
+              : filter === 'sell'
+              ? 'Bạn chưa bán sản phẩm nào'
+              : filter === 'cancelled'
+              ? 'Bạn chưa có giao dịch đã hủy'
+              : 'Bạn chưa có giao dịch nào'}
+          </p>
           <p className={styles['empty-subtitle']}>
-            Hãy bắt đầu {filter === 'buy' ? 'mua' : filter === 'sell' ? 'bán' : 'mua hoặc bán'} sản phẩm để tạo giao dịch
+            Hãy bắt đầu{' '}
+            {filter === 'buy'
+              ? 'mua'
+              : filter === 'sell'
+              ? 'bán'
+              : filter === 'cancelled'
+              ? 'mua hoặc bán'
+              : 'mua hoặc bán'}{' '}
+            sản phẩm để tạo giao dịch
           </p>
         </div>
       ) : (
@@ -234,9 +259,7 @@ const TransactionsPage = () => {
                   <span className={isBuyer ? styles['badge-buyer'] : styles['badge-seller']}>
                     {isBuyer ? '🛒 Đã mua' : '💰 Đã bán'}
                   </span>
-                  <span className={styles['status-badge']}>
-                    {getStatusBadge(t.status)}
-                  </span>
+                  <span className={styles['status-badge']}>{getStatusBadge(t.status)}</span>
                 </div>
 
                 {/* Product image */}
@@ -253,12 +276,12 @@ const TransactionsPage = () => {
                 {/* Product info */}
                 <div className={styles['card-body']}>
                   <div className={styles['product-title']}>
-                    {t.itemId?.title || t.itemId?.brand || (t.itemType === 'vehicle' ? 'Xe điện' : 'Pin')}
+                    {t.itemId?.title ||
+                      t.itemId?.brand ||
+                      (t.itemType === 'vehicle' ? 'Xe điện' : 'Pin')}
                   </div>
                   {t.itemId?.model && (
-                    <div className={styles['product-model']}>
-                      {t.itemId.model}
-                    </div>
+                    <div className={styles['product-model']}>{t.itemId.model}</div>
                   )}
                   <div className={styles['partner-name']}>
                     {isBuyer ? t.sellerId?.name : t.buyerId?.name}
@@ -271,9 +294,7 @@ const TransactionsPage = () => {
                 {/* Footer */}
                 <div className={styles['card-footer']}>
                   <small>{new Date(t.createdAt).toLocaleDateString('vi-VN')}</small>
-                  <button className={styles['btn-view-detail']}>
-                    Chi tiết →
-                  </button>
+                  <button className={styles['btn-view-detail']}>Chi tiết →</button>
                 </div>
               </div>
             );
@@ -287,7 +308,10 @@ const TransactionsPage = () => {
           <div className={styles['modal-content-large']} onClick={(e) => e.stopPropagation()}>
             <div className={styles['modal-header']}>
               <h2>Chi tiết giao dịch</h2>
-              <button onClick={() => setShowDetailModal(false)} className={styles['btn-close-modal']}>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className={styles['btn-close-modal']}
+              >
                 ✕
               </button>
             </div>
@@ -307,14 +331,23 @@ const TransactionsPage = () => {
               <div className={styles['detail-section']}>
                 <h3>Thông tin sản phẩm</h3>
                 <div className={styles['detail-grid']}>
-                  <div><strong>Tên:</strong> {selectedTransaction.itemId?.title || 'N/A'}</div>
+                  <div>
+                    <strong>Tên:</strong> {selectedTransaction.itemId?.title || 'N/A'}
+                  </div>
                   {selectedTransaction.itemId?.brand && (
-                    <div><strong>Hãng:</strong> {selectedTransaction.itemId.brand}</div>
+                    <div>
+                      <strong>Hãng:</strong> {selectedTransaction.itemId.brand}
+                    </div>
                   )}
                   {selectedTransaction.itemId?.model && (
-                    <div><strong>Model:</strong> {selectedTransaction.itemId.model}</div>
+                    <div>
+                      <strong>Model:</strong> {selectedTransaction.itemId.model}
+                    </div>
                   )}
-                  <div><strong>Loại:</strong> {selectedTransaction.itemType === 'vehicle' ? 'Xe điện' : 'Pin'}</div>
+                  <div>
+                    <strong>Loại:</strong>{' '}
+                    {selectedTransaction.itemType === 'vehicle' ? 'Xe điện' : 'Pin'}
+                  </div>
                 </div>
               </div>
 
@@ -322,11 +355,22 @@ const TransactionsPage = () => {
               <div className={styles['detail-section']}>
                 <h3>Thông tin giao dịch</h3>
                 <div className={styles['detail-grid']}>
-                  <div><strong>Trạng thái:</strong> {getStatusBadge(selectedTransaction.status)}</div>
-                  <div><strong>Giá sản phẩm:</strong> {selectedTransaction.price?.toLocaleString()}đ</div>
-                  <div><strong>Hoa hồng:</strong> {selectedTransaction.commission?.toLocaleString()}đ</div>
-                  <div><strong>Tổng:</strong> {selectedTransaction.totalAmount?.toLocaleString()}đ</div>
-                  <div><strong>Thanh toán:</strong> {getPaymentMethodLabel(selectedTransaction.paymentMethod)}</div>
+                  <div>
+                    <strong>Trạng thái:</strong> {getStatusBadge(selectedTransaction.status)}
+                  </div>
+                  <div>
+                    <strong>Giá sản phẩm:</strong> {selectedTransaction.price?.toLocaleString()}đ
+                  </div>
+                  <div>
+                    <strong>Hoa hồng:</strong> {selectedTransaction.commission?.toLocaleString()}đ
+                  </div>
+                  <div>
+                    <strong>Tổng:</strong> {selectedTransaction.totalAmount?.toLocaleString()}đ
+                  </div>
+                  <div>
+                    <strong>Thanh toán:</strong>{' '}
+                    {getPaymentMethodLabel(selectedTransaction.paymentMethod)}
+                  </div>
                 </div>
               </div>
 
@@ -336,16 +380,18 @@ const TransactionsPage = () => {
                   {selectedTransaction.buyerId?._id === currentUserId ? 'Người bán' : 'Người mua'}
                 </h3>
                 <div className={styles['detail-grid']}>
-                  <div><strong>Tên:</strong> {
-                    selectedTransaction.buyerId?._id === currentUserId
+                  <div>
+                    <strong>Tên:</strong>{' '}
+                    {selectedTransaction.buyerId?._id === currentUserId
                       ? selectedTransaction.sellerId?.name
-                      : selectedTransaction.buyerId?.name
-                  }</div>
-                  <div><strong>Email:</strong> {
-                    selectedTransaction.buyerId?._id === currentUserId
+                      : selectedTransaction.buyerId?.name}
+                  </div>
+                  <div>
+                    <strong>Email:</strong>{' '}
+                    {selectedTransaction.buyerId?._id === currentUserId
                       ? selectedTransaction.sellerId?.email
-                      : selectedTransaction.buyerId?.email
-                  }</div>
+                      : selectedTransaction.buyerId?.email}
+                  </div>
                 </div>
               </div>
 
@@ -360,14 +406,23 @@ const TransactionsPage = () => {
                         <div>
                           <strong>{currentReview.reviewerId?.name}</strong>
                           <div className={styles['star-rating']}>
-                            {[1, 2, 3, 4, 5].map(star => (
-                              <span key={star} className={star <= currentReview.rating ? styles['star-filled'] : styles['star-empty']}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span
+                                key={star}
+                                className={
+                                  star <= currentReview.rating
+                                    ? styles['star-filled']
+                                    : styles['star-empty']
+                                }
+                              >
                                 ★
                               </span>
                             ))}
                           </div>
                         </div>
-                        <small>{new Date(currentReview.createdAt).toLocaleDateString('vi-VN')}</small>
+                        <small>
+                          {new Date(currentReview.createdAt).toLocaleDateString('vi-VN')}
+                        </small>
                       </div>
 
                       {currentReview.comment && (
@@ -379,7 +434,11 @@ const TransactionsPage = () => {
                         <div className={styles['seller-response']}>
                           <strong>Phản hồi từ người bán:</strong>
                           <p>{currentReview.sellerResponse.comment}</p>
-                          <small>{new Date(currentReview.sellerResponse.respondedAt).toLocaleDateString('vi-VN')}</small>
+                          <small>
+                            {new Date(currentReview.sellerResponse.respondedAt).toLocaleDateString(
+                              'vi-VN'
+                            )}
+                          </small>
                         </div>
                       )}
 
@@ -406,7 +465,9 @@ const TransactionsPage = () => {
                       {selectedTransaction.sellerId?._id === currentUserId && (
                         <form onSubmit={handleSubmitResponse} className={styles['response-form']}>
                           <label>
-                            {currentReview.sellerResponse ? 'Chỉnh sửa phản hồi:' : 'Phản hồi đánh giá:'}
+                            {currentReview.sellerResponse
+                              ? 'Chỉnh sửa phản hồi:'
+                              : 'Phản hồi đánh giá:'}
                           </label>
                           <textarea
                             value={responseForm}
@@ -453,10 +514,12 @@ const TransactionsPage = () => {
               <div className={styles['form-group']}>
                 <label>Đánh giá:</label>
                 <div className={styles['star-rating']}>
-                  {[1, 2, 3, 4, 5].map(star => (
+                  {[1, 2, 3, 4, 5].map((star) => (
                     <span
                       key={star}
-                      className={star <= reviewForm.rating ? styles['star-filled'] : styles['star-empty']}
+                      className={
+                        star <= reviewForm.rating ? styles['star-filled'] : styles['star-empty']
+                      }
                       onClick={() => setReviewForm({ ...reviewForm, rating: star })}
                       style={{ cursor: 'pointer', fontSize: '32px' }}
                     >
@@ -484,11 +547,7 @@ const TransactionsPage = () => {
                 >
                   Hủy
                 </button>
-                <button
-                  type="submit"
-                  className={styles['btn-submit']}
-                  disabled={submitting}
-                >
+                <button type="submit" className={styles['btn-submit']} disabled={submitting}>
                   {submitting ? 'Đang gửi...' : currentReview ? 'Cập nhật' : 'Gửi đánh giá'}
                 </button>
               </div>
@@ -501,11 +560,19 @@ const TransactionsPage = () => {
 
   function getFilteredTransactions() {
     if (filter === 'buy') {
-      return transactions.filter(t => t.buyerId?._id === currentUserId);
+      return transactions.filter((t) => t.buyerId?._id === currentUserId);
     } else if (filter === 'sell') {
-      return transactions.filter(t => t.sellerId?._id === currentUserId);
+      return transactions.filter((t) => t.sellerId?._id === currentUserId);
+    } else if (filter === 'cancelled') {
+      // Chỉ hiển thị giao dịch đã hủy mà bạn là người mua
+      return transactions.filter(
+        (t) => t.status === 'cancelled' && t.buyerId?._id === currentUserId
+      );
     }
-    return transactions;
+    // Mặc định (Tất cả): ẩn giao dịch đã hủy nếu bạn là người bán
+    return transactions.filter(
+      (t) => !(t.status === 'cancelled' && t.sellerId?._id === currentUserId)
+    );
   }
 };
 
@@ -533,14 +600,7 @@ const getPaymentMethodLabel = (method) => {
   return methodMap[method] || method;
 };
 
-const getPaymentStatusLabel = (status) => {
-  const statusMap = {
-    unpaid: '⏳ Chưa thanh toán',
-    paid: '✅ Đã thanh toán',
-    refunded: '↩️ Đã hoàn tiền',
-  };
-  return statusMap[status] || status;
-};
+// Note: payment status label helper removed due to not being used
 
 const getUserId = () => {
   try {

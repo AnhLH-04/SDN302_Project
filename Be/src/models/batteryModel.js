@@ -19,7 +19,8 @@ const batterySchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['Lithium-ion', 'LFP', 'NMC', 'LTO', 'Solid-state', 'Other'],
+      trim: true,
+      // Cho phép nhập tự do loại pin (không giới hạn enum)
       default: 'Lithium-ion',
     },
     capacity: {
