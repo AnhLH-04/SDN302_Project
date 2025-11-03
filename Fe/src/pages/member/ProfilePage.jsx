@@ -3,7 +3,7 @@ import React from 'react';
 import styles from './ProfilePage.module.css';
 
 import { useEffect, useState } from 'react';
-import { getProfile, updateProfile } from '../../services/authService';
+import { getProfile, updateProfile, changePassword } from '../../services/authService';
 import { notifyLogin } from '../../utils/auth';
 
 const ProfilePage = () => {
@@ -13,6 +13,16 @@ const ProfilePage = () => {
   const [edit, setEdit] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  // Change password state
+  const [showChangePw, setShowChangePw] = useState(false);
+  const [pwForm, setPwForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -65,6 +75,46 @@ const ProfilePage = () => {
     }
   };
 
+  const handlePwChange = (e) => {
+    setPwForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess('');
+
+    const { currentPassword, newPassword, confirmPassword } = pwForm;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPwError('Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPwError('Mật khẩu mới phải có ít nhất 6 ký tự');
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setPwError('Mật khẩu mới phải khác mật khẩu hiện tại');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwError('Xác nhận mật khẩu không khớp');
+      return;
+    }
+
+    try {
+      setPwLoading(true);
+      await changePassword({ currentPassword, newPassword });
+      setPwSuccess('Đổi mật khẩu thành công!');
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Không thể đổi mật khẩu';
+      setPwError(msg);
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
@@ -106,6 +156,57 @@ const ProfilePage = () => {
           <button className={styles['profile-edit-btn']} onClick={() => setEdit(true)}>
             Chỉnh sửa
           </button>
+
+          {/* Change Password Section */}
+          <div style={{ marginTop: 24 }}>
+            <button
+              className={styles['profile-edit-btn']}
+              onClick={() => setShowChangePw((v) => !v)}
+              type="button"
+            >
+              {showChangePw ? 'Ẩn đổi mật khẩu' : 'Đổi mật khẩu'}
+            </button>
+
+            {showChangePw && (
+              <form
+                onSubmit={handleChangePassword}
+                className={styles['profile-form']}
+                style={{ marginTop: 16 }}
+              >
+                <input
+                  type="password"
+                  name="currentPassword"
+                  placeholder="Mật khẩu hiện tại"
+                  value={pwForm.currentPassword}
+                  onChange={handlePwChange}
+                  required
+                />
+                <input
+                  type="password"
+                  name="newPassword"
+                  placeholder="Mật khẩu mới (>= 6 ký tự)"
+                  value={pwForm.newPassword}
+                  onChange={handlePwChange}
+                  required
+                  minLength={6}
+                />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Xác nhận mật khẩu mới"
+                  value={pwForm.confirmPassword}
+                  onChange={handlePwChange}
+                  required
+                  minLength={6}
+                />
+                <button type="submit" disabled={pwLoading}>
+                  {pwLoading ? 'Đang đổi...' : 'Đổi mật khẩu'}
+                </button>
+                {pwSuccess && <div style={{ color: 'green' }}>{pwSuccess}</div>}
+                {pwError && <div style={{ color: 'red' }}>{pwError}</div>}
+              </form>
+            )}
+          </div>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className={styles['profile-form']}>

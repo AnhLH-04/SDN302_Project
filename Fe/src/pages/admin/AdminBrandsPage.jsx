@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { adminFetchBrands, adminCreateBrand, adminUpdateBrand } from '../../services/adminService';
 import styles from './AdminBrandsPage.module.css';
 
 const types = [
   { value: 'vehicle', label: 'Xe điện' },
   { value: 'battery', label: 'Pin' },
-  { value: 'both', label: 'Cả hai' },
+  // { value: 'both', label: 'Cả hai' },
 ];
 
 const AdminBrandsPage = () => {
@@ -15,22 +15,25 @@ const AdminBrandsPage = () => {
 
   const [form, setForm] = useState({ name: '', type: 'vehicle', isActive: true });
   const [submitting, setSubmitting] = useState(false);
+  const [filterType, setFilterType] = useState('all');
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await adminFetchBrands();
+      const params = {};
+      if (filterType !== 'all') params.type = filterType;
+      const res = await adminFetchBrands(params);
       setBrands(res?.data?.data?.brands || []);
     } catch {
       setError('Không tải được danh sách thương hiệu');
     }
     setLoading(false);
-  };
+  }, [filterType]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -122,6 +125,26 @@ const AdminBrandsPage = () => {
             {submitting ? 'Đang tạo...' : 'Thêm thương hiệu'}
           </button>
         </form>
+      </div>
+
+      {/* Filter Bar */}
+      <div className={styles['create-form-wrapper']} style={{ marginTop: 16 }}>
+        <h2 className={styles['form-title']}>Bộ lọc</h2>
+        <div className={styles['create-form']} style={{ display: 'flex', gap: 16 }}>
+          <div className={styles['form-group']} style={{ maxWidth: 260 }}>
+            <label className={styles['form-label']}>Lọc theo loại thương hiệu</label>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className={styles['form-select']}
+            >
+              <option value="all">Tất cả</option>
+              <option value="vehicle">Xe điện</option>
+              <option value="battery">Pin</option>
+              {/* <option value="both">Cả hai</option> */}
+            </select>
+          </div>
+        </div>
       </div>
 
       {loading ? (

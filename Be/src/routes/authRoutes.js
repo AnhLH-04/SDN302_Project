@@ -1,12 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import {
-    register,
-    login,
-    getMe,
-    updateMe,
-    changePassword,
-} from '../controllers/authController.js';
+import { register, login, getMe, updateMe, changePassword } from '../controllers/authController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
 
@@ -14,37 +8,38 @@ const router = express.Router();
 
 // Validation rules
 const registerValidation = [
-    body('name').trim().notEmpty().withMessage('Vui lòng nhập tên'),
-    body('email').isEmail().withMessage('Email không hợp lệ'),
-    body('password')
-        .isLength({ min: 6 })
-        .withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
-    body('phone')
-        .optional()
-        .matches(/^(0|\+84)[0-9]{9}$/)
-        .withMessage('Số điện thoại không hợp lệ (VD: 0901234567)'),
+  body('name').trim().notEmpty().withMessage('Vui lòng nhập tên'),
+  body('email').isEmail().withMessage('Email không hợp lệ'),
+  body('password').isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
+  body('phone')
+    .optional()
+    .matches(/^(0|\+84)[0-9]{9}$/)
+    .withMessage('Số điện thoại không hợp lệ (VD: 0901234567)'),
 ];
 
 const loginValidation = [
-    body('email').isEmail().withMessage('Email không hợp lệ'),
-    body('password').notEmpty().withMessage('Vui lòng nhập mật khẩu'),
+  body('email').isEmail().withMessage('Email không hợp lệ'),
+  body('password').notEmpty().withMessage('Vui lòng nhập mật khẩu'),
 ];
 
 const changePasswordValidation = [
-    body('currentPassword').notEmpty().withMessage('Vui lòng nhập mật khẩu hiện tại'),
-    body('newPassword')
-        .isLength({ min: 6 })
-        .withMessage('Mật khẩu mới phải có ít nhất 6 ký tự'),
+  body('currentPassword').notEmpty().withMessage('Vui lòng nhập mật khẩu hiện tại'),
+  body('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('Mật khẩu mới phải có ít nhất 6 ký tự')
+    .bail()
+    .custom((value, { req }) => value !== req.body.currentPassword)
+    .withMessage('Mật khẩu mới phải khác mật khẩu hiện tại'),
 ];
 
 const updateProfileValidation = [
-    body('name').optional().trim().notEmpty().withMessage('Tên không được để trống'),
-    body('phone')
-        .optional()
-        .matches(/^(0|\+84)[0-9]{9}$/)
-        .withMessage('Số điện thoại không hợp lệ (VD: 0901234567)'),
-    body('address').optional().trim(),
-    body('avatar').optional().isURL().withMessage('Avatar phải là URL hợp lệ'),
+  body('name').optional().trim().notEmpty().withMessage('Tên không được để trống'),
+  body('phone')
+    .optional()
+    .matches(/^(0|\+84)[0-9]{9}$/)
+    .withMessage('Số điện thoại không hợp lệ (VD: 0901234567)'),
+  body('address').optional().trim(),
+  body('avatar').optional().isURL().withMessage('Avatar phải là URL hợp lệ'),
 ];
 
 /**
@@ -226,24 +221,24 @@ router.put('/change-password', authenticate, changePasswordValidation, validate,
 
 /**
  * TODO: Các routes bổ sung cần thiết cho production:
- * 
+ *
  * 1. Email Verification
  *    - POST /api/auth/verify-email (gửi email xác thực)
  *    - GET /api/auth/verify/:token (xác nhận email qua link)
- * 
+ *
  * 2. Password Reset
  *    - POST /api/auth/forgot-password (gửi email reset)
  *    - POST /api/auth/reset-password/:token (đặt lại mật khẩu)
- * 
+ *
  * 3. Token Management
  *    - POST /api/auth/refresh-token (làm mới access token)
  *    - POST /api/auth/logout (blacklist token)
- * 
+ *
  * 4. Security Features
  *    - Rate limiting cho login/register (express-rate-limit)
  *    - 2FA/OTP authentication (optional)
  *    - Social login: Google, Facebook (passport.js)
- * 
+ *
  * 5. Profile Features
  *    - GET /api/auth/transaction-history (lịch sử giao dịch)
  *    - GET /api/auth/favorites (danh sách yêu thích)

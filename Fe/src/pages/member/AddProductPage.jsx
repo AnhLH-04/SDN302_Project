@@ -72,7 +72,6 @@ const AddProductPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
-
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
@@ -145,13 +144,12 @@ const AddProductPage = () => {
       // Images đã là array rồi, không cần parse
       const imageArray = form.images;
       // Parse images từ string thành array
-//       const imageArray = form.images
-//         ? form.images
-//             .split(',')
-//             .map((url) => url.trim())
-//             .filter((url) => url)
-//         : [];
-
+      //       const imageArray = form.images
+      //         ? form.images
+      //             .split(',')
+      //             .map((url) => url.trim())
+      //             .filter((url) => url)
+      //         : [];
 
       const payload = {
         title: form.name,
@@ -298,9 +296,7 @@ const AddProductPage = () => {
 
         {/* URL hình ảnh */}
         <div className={styles['image-input-section']}>
-          <label className={styles['image-label']}>
-            📸 Hình ảnh sản phẩm:
-          </label>
+          <label className={styles['image-label']}>📸 Hình ảnh sản phẩm:</label>
 
           <button
             type="button"
@@ -330,9 +326,7 @@ const AddProductPage = () => {
           )}
 
           <small className={styles['help-text']}>
-
             💡 Bạn có thể upload tối đa 10 ảnh. Định dạng: JPG, PNG, WEBP (Max 5MB/ảnh)
-
           </small>
         </div>
 
@@ -458,10 +452,10 @@ const AddProductPage = () => {
 
             <select name="condition" value={form.condition} onChange={handleChange} required>
               <option value="">Chọn tình trạng pin *</option>
-              <option value="new">Mới (New)</option>
-              <option value="like-new">Như mới (Like New)</option>
+              <option value="excellent">Xuất sắc (Excellent)</option>
               <option value="good">Tốt (Good)</option>
               <option value="fair">Khá (Fair)</option>
+              <option value="poor">Kém (Poor)</option>
             </select>
           </>
         )}
