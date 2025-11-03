@@ -19,3 +19,8 @@ export const verifyBattery = (id, data) =>
 
 // Resolve report
 export const resolveReport = (id, data) => axiosClient.put(`${API_BASE}/reports/${id}`, data);
+
+// Brands management (admin)
+export const adminFetchBrands = (params) => axiosClient.get(`${API_BASE}/brands`, { params });
+export const adminCreateBrand = (data) => axiosClient.post(`${API_BASE}/brands`, data);
+export const adminUpdateBrand = (id, data) => axiosClient.patch(`${API_BASE}/brands/${id}`, data);

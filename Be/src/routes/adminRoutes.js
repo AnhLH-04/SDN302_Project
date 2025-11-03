@@ -12,6 +12,7 @@ import {
   getInventoryReport,
 } from '../controllers/adminController.js';
 import { authenticate, authorize } from '../middlewares/auth.js';
+import { createBrand, getAllBrands, updateBrand } from '../controllers/brandController.js';
 import { validate } from '../middlewares/validate.js';
 
 const router = express.Router();
@@ -209,5 +210,10 @@ router.put(
  *         description: Inventory report retrieved successfully
  */
 router.get('/inventory-report', getInventoryReport);
+
+// Brands (admin only)
+router.get('/brands', getAllBrands);
+router.post('/brands', createBrand);
+router.patch('/brands/:id', updateBrand);
 
 export default router;

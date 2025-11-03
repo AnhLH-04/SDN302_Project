@@ -33,6 +33,12 @@ const AdminLayout = () => {
             Tin đăng
           </NavLink>
           <NavLink
+            to="/admin/brands"
+            className={({ isActive }) => (isActive ? styles.active : undefined)}
+          >
+            Thương hiệu
+          </NavLink>
+          <NavLink
             to="/admin/reports"
             className={({ isActive }) => (isActive ? styles.active : undefined)}
           >

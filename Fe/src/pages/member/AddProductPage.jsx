@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createVehicle, createBattery } from '../../services/productService';
+import { fetchBrands } from '../../services/brandService';
 import styles from './AddProductPage.module.css';
 
 const AddProductPage = () => {
@@ -32,7 +33,6 @@ const AddProductPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
-
   // Load Cloudinary Upload Widget script
   useEffect(() => {
     const script = document.createElement('script');
@@ -44,6 +44,34 @@ const AddProductPage = () => {
       document.body.removeChild(script);
     };
   }, []);
+
+  const [vehicleBrands, setVehicleBrands] = useState([]);
+  const [batteryBrands, setBatteryBrands] = useState([]);
+  const [brandsLoading, setBrandsLoading] = useState(false);
+
+  useEffect(() => {
+    // Fetch brands based on current type
+    setBrandsLoading(true);
+    const t = type === 'vehicle' ? 'vehicle' : 'battery';
+    fetchBrands(t)
+      .then((res) => {
+        const list = res?.data?.data?.brands || [];
+        if (t === 'vehicle') {
+          setVehicleBrands(list);
+          if (!form.brand && list.length > 0) setForm((f) => ({ ...f, brand: list[0].name }));
+        } else {
+          setBatteryBrands(list);
+          if (!form.brand && list.length > 0) setForm((f) => ({ ...f, brand: list[0].name }));
+        }
+      })
+      .catch(() => {
+        if (t === 'vehicle') setVehicleBrands([]);
+        else setBatteryBrands([]);
+      })
+      .finally(() => setBrandsLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
+
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -116,6 +144,14 @@ const AddProductPage = () => {
     try {
       // Images đã là array rồi, không cần parse
       const imageArray = form.images;
+      // Parse images từ string thành array
+//       const imageArray = form.images
+//         ? form.images
+//             .split(',')
+//             .map((url) => url.trim())
+//             .filter((url) => url)
+//         : [];
+
 
       const payload = {
         title: form.name,
@@ -197,10 +233,7 @@ const AddProductPage = () => {
         <option value="battery">🔋 Pin</option>
       </select>
 
-      <form
-        onSubmit={handleSubmit}
-        className={styles['add-product-form']}
-      >
+      <form onSubmit={handleSubmit} className={styles['add-product-form']}>
         {/* Thông tin chung */}
         <input
           name="name"
@@ -217,12 +250,25 @@ const AddProductPage = () => {
           onChange={handleChange}
         />
 
-        <input
-          name="brand"
-          placeholder="Hãng (VD: Tesla, VinFast, CATL)"
-          value={form.brand}
-          onChange={handleChange}
-        />
+        {type === 'vehicle' ? (
+          <select name="brand" value={form.brand} onChange={handleChange} required>
+            <option value="">Chọn hãng xe *</option>
+            {vehicleBrands.map((b) => (
+              <option key={`${b._id}-${b.name}`} value={b.name}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <select name="brand" value={form.brand} onChange={handleChange} required>
+            <option value="">Chọn hãng pin *</option>
+            {batteryBrands.map((b) => (
+              <option key={`${b._id}-${b.name}`} value={b.name}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        )}
 
         <input
           name="price"
@@ -284,7 +330,9 @@ const AddProductPage = () => {
           )}
 
           <small className={styles['help-text']}>
+
             💡 Bạn có thể upload tối đa 10 ảnh. Định dạng: JPG, PNG, WEBP (Max 5MB/ảnh)
+
           </small>
         </div>
 
@@ -418,7 +466,7 @@ const AddProductPage = () => {
           </>
         )}
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading || (type === 'vehicle' && brandsLoading)}>
           {loading ? (
             <>
               <span className={styles['loading-spinner']}></span>
@@ -431,6 +479,16 @@ const AddProductPage = () => {
 
         {error && <div className={styles['error-message']}>{error}</div>}
         {success && <div className={styles['success-message']}>{success}</div>}
+        {type === 'vehicle' && !brandsLoading && vehicleBrands.length === 0 && (
+          <div className={styles['error-message']}>
+            Hiện chưa có thương hiệu xe. Vui lòng liên hệ quản trị viên để thêm brand.
+          </div>
+        )}
+        {type === 'battery' && !brandsLoading && batteryBrands.length === 0 && (
+          <div className={styles['error-message']}>
+            Hiện chưa có thương hiệu pin. Vui lòng liên hệ quản trị viên để thêm brand.
+          </div>
+        )}
       </form>
     </div>
   );
